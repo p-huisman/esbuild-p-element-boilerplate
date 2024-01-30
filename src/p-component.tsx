@@ -36,11 +36,11 @@ export class PComponentElement extends CustomElement {
     this.addEventListener("click", this.onComponentClickHandler);
   }
 
-  attributeChangedCallback(
-    name: string,
-    oldValue: string,
-    newValue: string,
-  ) {
+  disconnectedCallback() {
+    this.removeEventListener("click", this.onComponentClickHandler);
+  }
+
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     if (oldValue !== newValue) {
       this.name = newValue;
     }
