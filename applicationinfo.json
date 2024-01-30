@@ -1,0 +1,11 @@
+{
+  "type": "applicatie",
+  "naam": "PGGM.Web.",
+  "team": {
+    "naam": "",
+    "productowner": "",
+    "softwarearchitect": "",
+    "email": ""
+  },
+  "datakoppelingen": []
+}
