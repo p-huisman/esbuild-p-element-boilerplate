@@ -13,7 +13,7 @@
     "build:types": "tsc -d -t es2020 --moduleResolution node --declarationDir types --emitDeclarationOnly",
     "develop": "concurrently \"node scripts/build.js\"",
     "lint": "eslint --fix --ext ts --ext tsx ./src",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test": "cross-env NODE_ENV=test karma start karma.conf.js --single-run",
     "testdevelop": "cross-env NODE_ENV=test karma start karma.conf.js"
   },
@@ -41,7 +41,6 @@
     "express": "^4.18.2",
     "fetch-mock": "^9.11.0",
     "husky": "^9.0.7",
-    "install": "^0.13.0",
     "istanbul-lib-instrument": "^6.0.1",
     "jasmine": "^5.1.0",
     "karma": "^6.4.2",
