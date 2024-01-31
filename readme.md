@@ -1,21 +1,50 @@
 # `<p-component>` element
 
+## About he boilerplate
+
+Boilerplate for creating a custom p-elements using esbuild
+
+This boilerplate includes:
+
+- [esbuild](https://esbuild.github.io/) for transpiling and bundeling typescript to javascript
+- [typescript](https://www.typescriptlang.org/) for generating typings
+- [postcss](https://postcss.org/) for css pre processing
+- [karma](https://karma-runner.github.io/) Test runner
+- [jasmine](https://jasmine.github.io/) Test framework
+- [husky](https://typicode.github.io/husky/) git hooks made easy, lint staged files before commit
+- [eslint](https://eslint.org/) linting
+- [prettier](https://prettier.io/) code formatter (eslint plugin)
+- [sonarjs](https://github.com/SonarSource/eslint-plugin-sonarjs) typescript analyzer (eslint plugin)
+- [express](https://expressjs.com/) local development web server
+
+## Getting started with this boilerplate
+
+- Rename the tagName value `p-component` in the `CustomElementConfig` decorator.
+- Rename the class name `PComponentElement` to the desired name. Tip: use F2 in visual studio code.
+- Rename the component source file `src/p-component.tsx` to the name of your custom element.
+- Rename the component test source file `src/p-component.spec.tsx` to the name of your custom element.
+- Rename the component stylesheet `src/p-component.css` to the name of your custom element.
+- Edit the `name`, `repository` and `types` properties in the `package.json` file to match your component.
+- In the build file `scripts/build.js` change the value `src/p-component.tsx` of constant `buildOptions.entryPoints` to the match your component source file.
+- Change the script src and `<p-component name="World"></p-component>` markup in `demo/index.html` so your component script loads correct.
 
 ## Attributes
-| Name | Description |
-|------|-------------|
+
+| Name | Description       |
+| ---- | ----------------- |
 | name | a name e.g. Peter |
 
 ## Properties
-| Name | Description | Type |
-|------|-------------|------|
+
+| Name | Description       | Type   |
+| ---- | ----------------- | ------ |
 | name | a name e.g. Peter | string |
 
 ## Events
-| Name | Description |
-|------|-------------|
-|      |             |
 
+| Name | Description |
+| ---- | ----------- |
+|      |             |
 
 ## Install npm packages
 
