@@ -79,7 +79,9 @@ if (isProduction) {
     const ctx = await esbuild.context(buildOptions);
     await ctx.watch();
   })();
-  openTestInBrowser(server, serverOptions);
+  if (isTest) {
+    openTestInBrowser(server, serverOptions);
+  }
 }
 
 async function openTestInBrowser(server, serverOptions) {
@@ -118,7 +120,11 @@ async function openTestInBrowser(server, serverOptions) {
         converter.applyCoverage(entry.functions);
         const istanbul = converter.toIstanbul();
         for (const key in istanbul) {
-          const np = path.join(__dirname, "../", key.split(`:${serverOptions.port  }`, 2)[1]);
+          const np = path.join(
+            __dirname,
+            "../",
+            key.split(`:${serverOptions.port}`, 2)[1],
+          );
           if (np.includes(".spec.") === false) {
             istanbul[key].path = np;
             entries[np] = istanbul[key];

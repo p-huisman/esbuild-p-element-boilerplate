@@ -29,7 +29,7 @@ describe("p-component custom element", () => {
         element.shadowRoot,
         ".greeting",
       )) as HTMLDivElement;
-      expect(greeting.textContent).to.be.equal("Hello P-COMPONENT!");
+      expect(greeting.textContent).to.be.equal("Hello P-COMPONENT");
       element.remove();
     });
   });
@@ -43,7 +43,7 @@ describe("p-component custom element", () => {
         element.shadowRoot,
         ".greeting",
       )) as HTMLDivElement;
-      expect(greeting.textContent).to.be.equal("Hello TEST!");
+      expect(greeting.textContent).to.be.equal("Hello TEST");
       element.remove();
     });
   });
