@@ -47,4 +47,14 @@ describe("p-component custom element", () => {
       element.remove();
     });
   });
+  describe("when clicked", () => {
+    it(" a clicked attribute is added", async () => {
+      const element = document.createElement(pComponentTagName);
+      document.body.appendChild(element);
+      await customElements.whenDefined(pComponentTagName);
+      element.click();
+      expect(element.hasAttribute("clicked")).to.be.true;
+      element.remove();
+    });
+  });
 });

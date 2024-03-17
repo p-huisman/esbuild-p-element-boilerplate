@@ -34,7 +34,7 @@ export class PComponentElement extends CustomElement {
   };
 
   private onComponentClickHandler = () => {
-    console.log("PComponentElement clicked");
+    this.setAttribute("clicked", "");
   };
 
   connectedCallback() {
