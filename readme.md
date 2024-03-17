@@ -1,6 +1,6 @@
 # `<p-component>` element
 
-## About he boilerplate
+## About the boilerplate
 
 Boilerplate for creating a custom p-elements using esbuild
 
@@ -9,8 +9,9 @@ This boilerplate includes:
 - [esbuild](https://esbuild.github.io/) for transpiling and bundeling typescript to javascript
 - [typescript](https://www.typescriptlang.org/) for generating typings
 - [postcss](https://postcss.org/) for css pre processing
-- [karma](https://karma-runner.github.io/) Test runner
-- [jasmine](https://jasmine.github.io/) Test framework
+- [mocha](https://mochajs.org/) Test runner
+- [chai](https://www.chaijs.com/) Assertion library
+- [playwright](https://playwright.dev/) Test framework
 - [husky](https://typicode.github.io/husky/) git hooks made easy, lint staged files before commit
 - [eslint](https://eslint.org/) linting
 - [prettier](https://prettier.io/) code formatter (eslint plugin)

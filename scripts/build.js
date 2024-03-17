@@ -15,6 +15,11 @@ const entryPoints = isTest || isTestDevelopment
   ? ["src/p-component.spec.tsx"]
   : ["src/p-component.tsx"];
 
+const testScripts = [
+  "/node_modules/p-elements-core/dist/p-elements-core-modern.js",
+  "/dist/p-component.spec.js",
+];
+
 function log(message) {
   console.log(
     `[${new Date().toISOString().split("T")[1].split("Z")[0]}] ${message}`,
@@ -50,10 +55,13 @@ if (isProduction) {
 
   app.get("/_test", async (req, res) => {
     let content = await readFile("./scripts/test.html", "utf-8");
+    const scripts = testScripts.map((src) => `<script defer src="${src}"></script>`).join("\n");
+    content = content .replace("<!-- scripts -->", scripts); 
     if (isTest) {
       content = content.replace("// onEnd", `.on("end", function (d) {
         console.log("END ", this.stats);
-      });`).replace("// reporter", "reporter: 'xunit',");
+      });`)
+      .replace("// reporter", "reporter: 'xunit',"); 
     }
     res.send(content);
   });
