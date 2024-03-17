@@ -16,7 +16,7 @@
     "lint": "eslint --fix --ext ts --ext tsx ./src",
     "prepare": "husky",
     "test": "cross-env NODE_ENV=test node scripts/build.js && npx nyc report --reporter=lcov",
-    "testdevelop": ""
+    "testdevelop": "cross-env NODE_ENV=testdevelop node scripts/build.js"
   },
   "keywords": [],
   "author": "",

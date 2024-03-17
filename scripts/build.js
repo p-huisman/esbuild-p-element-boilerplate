@@ -1,6 +1,7 @@
 const CSSPlugin = require("./css-plugin");
 const isProduction = require("process").env.NODE_ENV === "production";
 const isTest = require("process").env.NODE_ENV === "test";
+const isTestDevelopment = require("process").env.NODE_ENV === "testdevelop";
 const createServer = require("http").createServer;
 const express = require("express");
 const serveIndex = require("serve-index");
@@ -10,7 +11,7 @@ const esbuild = require("esbuild");
 const {readFile, writeFile, mkdir} = require("fs/promises");
 const path = require("path");
 
-const entryPoints = isTest
+const entryPoints = isTest || isTestDevelopment
   ? ["src/p-component.spec.tsx"]
   : ["src/p-component.tsx"];
 
@@ -25,7 +26,7 @@ const buildOptions = {
   bundle: true,
   target: "es6",
   outdir: "dist",
-  sourcemap: "inline",
+  sourcemap: isTest || isTestDevelopment ? "inline" : true,
   plugins: [CSSPlugin],
   loader: {
     ".html": "text",
@@ -48,7 +49,12 @@ if (isProduction) {
   require("./api/index")(app);
 
   app.get("/_test", async (req, res) => {
-    const content = await readFile("./scripts/test.html", "utf-8");
+    let content = await readFile("./scripts/test.html", "utf-8");
+    if (isTest) {
+      content = content.replace("// onEnd", `.on("end", function (d) {
+        console.log("END ", this.stats);
+      });`).replace("// reporter", "reporter: 'xunit',");
+    }
     res.send(content);
   });
 
@@ -79,12 +85,13 @@ if (isProduction) {
     const ctx = await esbuild.context(buildOptions);
     await ctx.watch();
   })();
-  if (isTest) {
+  if (isTest || isTestDevelopment) {
     openTestInBrowser(server, serverOptions);
   }
 }
 
 async function openTestInBrowser(server, serverOptions) {
+  let xunit = `<?xml version="1.0"?>` + "\n";
   const v8toIstanbul = require("v8-to-istanbul");
   const {chromium, firefox, webkit} = require("playwright-core");
   const browserName = "chromium";
@@ -98,53 +105,60 @@ async function openTestInBrowser(server, serverOptions) {
     devtools: true,
   });
   const page = await browser.newPage();
-  page.on("console", async (msg) => {
-    const txt = msg.text();
-    if (txt.startsWith("END ")) {
-      const coverage = (await page.coverage.stopJSCoverage())
-        .filter((entry) => {
-          return entry.url.includes(".spec");
-        })
-        .map((entry) => {
-          return entry;
-        });
-
-      const entries = {};
-
-      for (const entry of coverage) {
-        const converter = v8toIstanbul(entry.url, 0, {
-          source: entry.source,
-        });
-
-        await converter.load();
-        converter.applyCoverage(entry.functions);
-        const istanbul = converter.toIstanbul();
-        for (const key in istanbul) {
-          const np = path.join(
-            __dirname,
-            "../",
-            key.split(`:${serverOptions.port}`, 2)[1],
-          );
-          if (np.includes(".spec.") === false) {
-            istanbul[key].path = np;
-            entries[np] = istanbul[key];
+  if (isTest) {
+    page.on("console", async (msg) => {
+      const txt = msg.text();
+      
+      // mocha test end
+      if (txt.startsWith("END ")) { 
+        // get coverage
+        const coverage = (await page.coverage.stopJSCoverage())
+          .filter((entry) => {
+            return entry.url.includes(".spec");
+          })
+          .map((entry) => {
+            return entry;
+          });
+        const entries = {};
+        for (const entry of coverage) {
+          const converter = v8toIstanbul(entry.url, 0, {
+            source: entry.source,
+          });
+          await converter.load();
+          converter.applyCoverage(entry.functions);
+          const istanbul = converter.toIstanbul();
+          for (const key in istanbul) {
+            const np = path.join(
+              __dirname,
+              "../",
+              key.split(`:${serverOptions.port}`, 2)[1],
+            );
+            if (np.includes(".spec.") === false) {
+              istanbul[key].path = np;
+              entries[np] = istanbul[key];
+            }
           }
         }
+        await mkdir(`./.nyc_output`, {recursive: true});
+        await writeFile(
+          `./.nyc_output/coverage-pw.json`,
+          JSON.stringify(entries),
+        );
+        await writeFile(
+          `./TESTS-xunit.xml`,
+          xunit,
+        );
+        await browser.close();
+        server.close();
+        esbuild.stop();
+        
+      } else if(txt.trim().startsWith("<")){
+        xunit += txt;
+      } else {
+        console.log(txt);
       }
-
-      await mkdir(`./.nyc_output`, {recursive: true});
-      await writeFile(
-        `./.nyc_output/coverage-pw.json`,
-        JSON.stringify(entries, null, 2),
-      );
-
-      await browser.close();
-      server.close();
-      esbuild.stop();
-    } else {
-      console.log(txt);
-    }
-  });
-  page.coverage.startJSCoverage();
+    });
+    page.coverage.startJSCoverage();
+  }
   page.goto(`http://${serverOptions.host}:${serverOptions.port}/_test`);
 }
