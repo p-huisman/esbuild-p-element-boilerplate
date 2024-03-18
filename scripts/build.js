@@ -1,7 +1,4 @@
 const CSSPlugin = require("./css-plugin");
-const isProduction = require("process").env.NODE_ENV === "production";
-const isTest = require("process").env.NODE_ENV === "test";
-const isTestDevelopment = require("process").env.NODE_ENV === "testdevelop";
 const createServer = require("http").createServer;
 const express = require("express");
 const serveIndex = require("serve-index");
@@ -10,6 +7,10 @@ const client = require("esbuild-plugin-dev-server").client;
 const esbuild = require("esbuild");
 const {readFile, writeFile, mkdir} = require("fs/promises");
 const path = require("path");
+
+const isProduction = require("process").env.NODE_ENV === "production";
+const isTest = require("process").env.NODE_ENV === "test";
+const isTestDevelopment = require("process").env.NODE_ENV === "testdevelop";
 
 const entryPoints = isTest || isTestDevelopment
   ? ["src/p-component.spec.tsx"]
@@ -58,7 +59,7 @@ if (isProduction) {
     const scripts = testScripts.map((src) => `<script defer src="${src}"></script>`).join("\n");
     content = content .replace("<!-- scripts -->", scripts); 
     if (isTest) {
-      content = content.replace("// onEnd", `.on("end", function (d) {
+      content = content.replace("/*onEnd*/", `.on("end", function (d) {
         console.log("END ", this.stats);
       });`)
       .replace("// reporter", "reporter: 'xunit',"); 
@@ -99,6 +100,7 @@ if (isProduction) {
 }
 
 async function openTestInBrowser(server, serverOptions) {
+  log("Test started");
   let xunit = `<?xml version="1.0"?>` + "\n";
   const v8toIstanbul = require("v8-to-istanbul");
   const {chromium, firefox, webkit} = require("playwright-core");
@@ -116,10 +118,9 @@ async function openTestInBrowser(server, serverOptions) {
   if (isTest) {
     page.on("console", async (msg) => {
       const txt = msg.text();
-      
       // mocha test end
       if (txt.startsWith("END ")) { 
-        // get coverage
+        log("Reporting started");
         const coverage = (await page.coverage.stopJSCoverage())
           .filter((entry) => {
             return entry.url.includes(".spec");
@@ -156,10 +157,11 @@ async function openTestInBrowser(server, serverOptions) {
           `./TESTS-xunit.xml`,
           xunit,
         );
+        log("Reporting complete");
         await browser.close();
         server.close();
         esbuild.stop();
-        
+        log("Test complete");
       } else if(txt.trim().startsWith("<")){
         xunit += txt;
       } else {
