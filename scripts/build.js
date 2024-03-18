@@ -6,6 +6,7 @@ const socketServer = require("esbuild-plugin-dev-server").socketServer;
 const client = require("esbuild-plugin-dev-server").client;
 const esbuild = require("esbuild");
 const {readFile, writeFile, mkdir} = require("fs/promises");
+const fs = require("fs");
 const path = require("path");
 
 const isProduction = require("process").env.NODE_ENV === "production";
@@ -21,7 +22,8 @@ const testScripts = [
   "/dist/p-component.spec.js",
 ];
 
-const executablePath = undefined; // `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`
+const edgeLocation = `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`;
+const executablePath = fs.existsSync(edgeLocation) ? edgeLocation : undefined;
 
 function log(message) {
   console.log(
@@ -52,9 +54,7 @@ if (isProduction) {
   })();
 } else {
   const serverOptions = {host: "localhost", port: 9000};
-  if (!isTest){
-    buildOptions.banner = {js: client()};
-  }
+  buildOptions.banner = {js: client()};
   const app = express({strict: false});
   require("./api/index")(app);
 
@@ -64,8 +64,12 @@ if (isProduction) {
     content = content .replace("<!-- scripts -->", scripts); 
     if (isTest) {
       content = content.replace("/*onEnd*/", `.on("end", function (d) {
-        console.log("END ", this.stats);
-      });`)
+        if(this.failures && this.failures > 0){
+          console.log("FAIL");
+        } else {
+          console.log("END ", this.stats);
+        }
+      })`)
       .replace("// reporter", "reporter: 'xunit',"); 
     }
     res.send(content);
@@ -74,11 +78,7 @@ if (isProduction) {
   log(`Start dev server http://${serverOptions.host}:${serverOptions.port}`);
   app.use(express.static("./"), serveIndex("./", {icons: true}));
   const server = createServer(app);
-  let write;
-  if (!isTest) {
-    write = socketServer(server);
-  }
-  
+  const write = socketServer(server);
 
   buildOptions.plugins.push({
     name: "build",
@@ -87,9 +87,7 @@ if (isProduction) {
         log("Build started");
       });
       build.onEnd((result) => {
-        if (write){
-          write(result);
-        }
+        write(result);
         log("Build complete");
         [...result.errors, ...result.warnings].forEach((element) => {
           console.log(element);
@@ -164,17 +162,25 @@ async function openTestInBrowser(server, serverOptions) {
           xunit,
         );
         log("Reporting complete");
+        await server.close();
+        await esbuild.stop();
         await browser.close();
-        server.close();
-        esbuild.stop();
+        
         log("Test complete");
-      } else if(txt.trim().startsWith("<")){
+        process.exit(0);
+      } else if(txt === "FAIL"){
+        log("Test failed");
+        process.exit(1);
+      }
+      else if(txt.trim().startsWith("<")){
         xunit += txt;
       } else {
         console.log(txt);
       }
     });
-    page.coverage.startJSCoverage();
+    await page.coverage.startJSCoverage();
   }
-  page.goto(`http://${serverOptions.host}:${serverOptions.port}/_test`);
+  await page.goto(`http://localhost:${serverOptions.port}/_test`).catch(e => {
+    console.info(e);
+  });
 }

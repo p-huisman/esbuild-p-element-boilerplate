@@ -71,6 +71,19 @@ npm run develop
 npm test
 ```
 
+## Test development
+
+```
+npm run testdevelop
+```
+
+## HTML Coverage report
+
+```
+npm run test
+npm run coverage-report
+```
+
 ## Before submitting changes
 
 lint
