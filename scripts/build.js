@@ -50,7 +50,9 @@ if (isProduction) {
   })();
 } else {
   const serverOptions = {host: "localhost", port: 9000};
-  buildOptions.banner = {js: client()};
+  if (!isTest){
+    buildOptions.banner = {js: client()};
+  }
   const app = express({strict: false});
   require("./api/index")(app);
 
@@ -70,7 +72,11 @@ if (isProduction) {
   log(`Start dev server http://${serverOptions.host}:${serverOptions.port}`);
   app.use(express.static("./"), serveIndex("./", {icons: true}));
   const server = createServer(app);
-  const write = socketServer(server);
+  let write;
+  if (!isTest) {
+    write = socketServer(server);
+  }
+  
 
   buildOptions.plugins.push({
     name: "build",
@@ -79,7 +85,9 @@ if (isProduction) {
         log("Build started");
       });
       build.onEnd((result) => {
-        write(result);
+        if (write){
+          write(result);
+        }
         log("Build complete");
         [...result.errors, ...result.warnings].forEach((element) => {
           console.log(element);
@@ -103,16 +111,12 @@ async function openTestInBrowser(server, serverOptions) {
   log("Test started");
   let xunit = `<?xml version="1.0"?>` + "\n";
   const v8toIstanbul = require("v8-to-istanbul");
-  const {chromium, firefox, webkit} = require("playwright-core");
-  const browserName = "chromium";
-  const browserType = {
-    chromium,
-    firefox,
-    webkit,
-  }[browserName];
+  const {chromium} = require("playwright-core");
+  const browserType =  chromium;
   const browser = await browserType.launch({
-    headless: false,
-    devtools: true,
+    executablePath: `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`,
+    headless: isTest === true,
+    devtools: isTest !== true,
   });
   const page = await browser.newPage();
   if (isTest) {
