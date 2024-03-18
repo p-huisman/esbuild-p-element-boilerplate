@@ -21,6 +21,8 @@ const testScripts = [
   "/dist/p-component.spec.js",
 ];
 
+const executablePath = undefined; // `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`
+
 function log(message) {
   console.log(
     `[${new Date().toISOString().split("T")[1].split("Z")[0]}] ${message}`,
@@ -114,7 +116,7 @@ async function openTestInBrowser(server, serverOptions) {
   const {chromium} = require("playwright-core");
   const browserType =  chromium;
   const browser = await browserType.launch({
-    executablePath: `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`,
+    executablePath,
     headless: isTest === true,
     devtools: isTest !== true,
   });
