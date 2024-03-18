@@ -24,12 +24,17 @@ export class PComponentElement extends CustomElement {
 
   private render = () => {
     return (
-      <div class="greeting">Hello {this.name ? this.name : "P-COMPONENT"}!</div>
+      <div class="greeting">
+        Hello{" "}
+        <span class="greeting-name">
+          {this.name ? this.name : "P-COMPONENT"}
+        </span>
+      </div>
     );
   };
 
   private onComponentClickHandler = () => {
-    console.log("PComponentElement clicked");
+    this.setAttribute("clicked", "");
   };
 
   connectedCallback() {

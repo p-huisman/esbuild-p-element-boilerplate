@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mocha Tests</title>
+    <link rel="icon" href="/scripts/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script class="mocha-init">
+      mocha.setup({
+        ui: "bdd",
+        // reporter
+      });
+    </script>
+    <!-- scripts -->
+    <script class="mocha-exec">
+      document.addEventListener("DOMContentLoaded", function () {
+        mocha.run() /*onEnd*/;
+      });
+    </script>
+  </body>
+</html>
