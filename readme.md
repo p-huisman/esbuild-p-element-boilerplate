@@ -9,8 +9,7 @@ This boilerplate includes:
 - [esbuild](https://esbuild.github.io/) for transpiling and bundeling typescript to javascript
 - [typescript](https://www.typescriptlang.org/) for generating typings
 - [postcss](https://postcss.org/) for css pre processing
-- [mocha](https://mochajs.org/) Test runner
-- [chai](https://www.chaijs.com/) Assertion library
+- [jasmine](https://jasmine.github.io/) Browser test runner
 - [playwright](https://playwright.dev/) Test framework
 - [husky](https://typicode.github.io/husky/) git hooks made easy, lint staged files before commit
 - [eslint](https://eslint.org/) linting

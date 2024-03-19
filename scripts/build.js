@@ -63,14 +63,8 @@ if (isProduction) {
     const scripts = testScripts.map((src) => `<script defer src="${src}"></script>`).join("\n");
     content = content .replace("<!-- scripts -->", scripts); 
     if (isTest) {
-      content = content.replace("/*onEnd*/", `.on("end", function (d) {
-        if(this.failures && this.failures > 0){
-          console.log("FAIL");
-        } else {
-          console.log("END ", this.stats);
-        }
-      })`)
-      .replace("// reporter", "reporter: 'xunit',"); 
+      content = content.replace("/* onEnd */", `console.log("END_" + info.overallStatus.toUpperCase());`)
+      .replace("/* addReporter */", `jasmine.getEnv().addReporter(junitReporter);`);
     }
     res.send(content);
   });
@@ -109,7 +103,7 @@ if (isProduction) {
 
 async function openTestInBrowser(server, serverOptions) {
   log("Test started");
-  let xunit = `<?xml version="1.0"?>` + "\n";
+  let xunit = "";
   const v8toIstanbul = require("v8-to-istanbul");
   const {chromium} = require("playwright-core");
   const browserType =  chromium;
@@ -123,8 +117,8 @@ async function openTestInBrowser(server, serverOptions) {
     page.on("console", async (msg) => {
       const txt = msg.text();
       // mocha test end
-      if (txt.startsWith("END ")) { 
-        log("Reporting started");
+      if (txt === "END_PASSED") { 
+        
         const coverage = (await page.coverage.stopJSCoverage())
           .filter((entry) => {
             return entry.url.includes(".spec");
@@ -168,12 +162,16 @@ async function openTestInBrowser(server, serverOptions) {
         
         log("Test complete");
         process.exit(0);
-      } else if(txt === "FAIL"){
+      } else if(txt === "END_FAILED"){
         log("Test failed");
         process.exit(1);
       }
-      else if(txt.trim().startsWith("<")){
-        xunit += txt;
+      else if(txt === "END_INCOMPLETE"){
+        log("Test incomplete");
+        process.exit(0);
+      }
+      else if(txt.startsWith("REPORT ")){
+        xunit = txt.split("REPORT ", 2)[1];
       } else {
         console.log(txt);
       }

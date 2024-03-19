@@ -1,5 +1,4 @@
 import {PComponentElement} from "./p-component";
-import {expect} from "chai";
 
 const waitForSelector = async (root: ShadowRoot, selector: string) => {
   return new Promise((resolve) => {
@@ -17,7 +16,7 @@ const pComponentTagName = "p-component";
 
 describe("p-component custom element", () => {
   it("is defined", async () => {
-    expect(PComponentElement).to.be.instanceof(Function);
+    expect(PComponentElement).toBeDefined();
     await customElements.whenDefined(pComponentTagName);
   });
   describe("when no name attribute is set", () => {
@@ -29,7 +28,7 @@ describe("p-component custom element", () => {
         element.shadowRoot,
         ".greeting",
       )) as HTMLDivElement;
-      expect(greeting.textContent).to.be.equal("Hello P-COMPONENT");
+      expect(greeting.textContent).toBe("Hello P-COMPONENT");
       element.remove();
     });
   });
@@ -43,7 +42,7 @@ describe("p-component custom element", () => {
         element.shadowRoot,
         ".greeting",
       )) as HTMLDivElement;
-      expect(greeting.textContent).to.be.equal("Hello TEST");
+      expect(greeting.textContent).toBe("Hello TEST");
       element.remove();
     });
   });
@@ -53,7 +52,7 @@ describe("p-component custom element", () => {
       document.body.appendChild(element);
       await customElements.whenDefined(pComponentTagName);
       element.click();
-      expect(element.hasAttribute("clicked")).to.be.true;
+      expect(element.hasAttribute("clicked")).toBeTrue();
       element.remove();
     });
   });
