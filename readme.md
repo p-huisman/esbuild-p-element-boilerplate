@@ -25,7 +25,7 @@ This boilerplate includes:
 - Rename the component test source file `src/p-component.spec.tsx` to the name of your custom element.
 - Rename the component stylesheet `src/p-component.css` to the name of your custom element.
 - Edit the `name`, `repository` and `types` properties in the `package.json` file to match your component.
-- In the build file `scripts/build.js` change the value `src/p-component.tsx` of constant `buildOptions.entryPoints` to the match your component source file.
+- Edit the (`scripsts/build.js`) so the entryPoints and testScripts match your component source file.
 - Change the script src and `<p-component name="World"></p-component>` markup in `demo/index.html` so your component script loads correct.
 
 ## Attributes
