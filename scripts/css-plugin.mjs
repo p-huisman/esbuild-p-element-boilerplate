@@ -1,17 +1,18 @@
-const esbuild = require("esbuild");
-const process = require("process");
-const {readFile} = require("fs/promises");
-const postcss = require("postcss");
-const isProduction = process.env.NODE_ENV === "production";
-const minify = isProduction;
+import postcss from "postcss";
+import postcssPresetEnv from "postcss-preset-env";
+import {readFile} from "fs/promises";
+import esbuild from "esbuild";
+import process from "process";
 
-const CSSPlugin = {
+const minify = process.env.NODE_ENV === "production";
+
+export const CSSPlugin = {
   name: "CSSPlugin",
   setup(build) {
     build.onLoad({filter: /\.css$/}, async (args) => {
       let css = await readFile(args.path);
       const postcssResult = await postcss([
-        require("postcss-preset-env")({
+        postcssPresetEnv({
           grid: true,
         }),
       ]).process(css, {from: undefined}).css;
@@ -23,5 +24,3 @@ const CSSPlugin = {
     });
   },
 };
-
-module.exports = CSSPlugin;

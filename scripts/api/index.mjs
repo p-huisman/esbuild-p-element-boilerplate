@@ -1,11 +1,11 @@
-const path = require("path");
-const bodyParser = require("body-parser");
+import bodyParser from "body-parser";
 
-module.exports = (app) => {
+const api = (app) => {
   app.use(bodyParser.json());
 
   app.get("/api/greet", (req, res) => {
     res.send({message: "hi"});
   });
+}
 
-};
+export default api;

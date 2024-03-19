@@ -1,36 +1,43 @@
-const CSSPlugin = require("./css-plugin");
-const createServer = require("http").createServer;
-const express = require("express");
-const serveIndex = require("serve-index");
-const socketServer = require("esbuild-plugin-dev-server").socketServer;
-const client = require("esbuild-plugin-dev-server").client;
-const esbuild = require("esbuild");
-const {readFile, writeFile, mkdir} = require("fs/promises");
-const fs = require("fs");
-const path = require("path");
+import { CSSPlugin } from "./css-plugin.mjs";
+import { createServer } from "http";
+import express from "express";
+import serveIndex from "serve-index";
+import { socketServer } from "esbuild-plugin-dev-server";
+import { client } from "esbuild-plugin-dev-server";
+import esbuild from "esbuild";
+import { readFile, writeFile, mkdir } from "fs/promises";
+import fs from "fs";
+import path from "path";
+import process from "process";
+import v8toIstanbul from "v8-to-istanbul";
+import { chromium } from "playwright-core";;
+import api from "./api/index.mjs";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { Console } from "console";
 
-const isProduction = require("process").env.NODE_ENV === "production";
-const isTest = require("process").env.NODE_ENV === "test";
-const isTestDevelopment = require("process").env.NODE_ENV === "testdevelop";
+const isProduction = process.env.NODE_ENV === "production";
+const isTest = process.env.NODE_ENV === "test";
+const isTestDevelopment = process.env.NODE_ENV === "testdevelop";
 
 const entryPoints = isTest || isTestDevelopment
   ? ["src/p-component.spec.tsx"]
   : ["src/p-component.tsx"];
-
 const testScripts = [
   "/node_modules/p-elements-core/dist/p-elements-core-modern.js",
   "/dist/p-component.spec.js",
 ];
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const console = new Console(process.stdout, process.stderr);
 const edgeLocation = `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`;
-const executablePath = fs.existsSync(edgeLocation) ? edgeLocation : undefined;
-
+const executablePath = fs.existsSync
+  (edgeLocation) ? edgeLocation : undefined;
 function log(message) {
   console.log(
     `[${new Date().toISOString().split("T")[1].split("Z")[0]}] ${message}`,
   );
 }
-
 const buildOptions = {
   entryPoints,
   bundle: true,
@@ -53,24 +60,24 @@ if (isProduction) {
     log(`End build`);
   })();
 } else {
-  const serverOptions = {host: "localhost", port: 9000};
-  buildOptions.banner = {js: client()};
-  const app = express({strict: false});
-  require("./api/index")(app);
+  const serverOptions = { host: "localhost", port: 9000 };
+  buildOptions.banner = { js: client() };
+  const app = express({ strict: false });
+  api(app);
 
   app.get("/_test", async (req, res) => {
     let content = await readFile("./scripts/test.html", "utf-8");
     const scripts = testScripts.map((src) => `<script defer src="${src}"></script>`).join("\n");
-    content = content .replace("<!-- scripts -->", scripts); 
+    content = content.replace("<!-- scripts -->", scripts);
     if (isTest) {
       content = content.replace("/* onEnd */", `console.log("END_" + info.overallStatus.toUpperCase());`)
-      .replace("/* addReporter */", `jasmine.getEnv().addReporter(junitReporter);`);
+        .replace("/* addReporter */", `jasmine.getEnv().addReporter(junitReporter);`);
     }
     res.send(content);
   });
 
   log(`Start dev server http://${serverOptions.host}:${serverOptions.port}`);
-  app.use(express.static("./"), serveIndex("./", {icons: true}));
+  app.use(express.static("./"), serveIndex("./", { icons: true }));
   const server = createServer(app);
   const write = socketServer(server);
 
@@ -104,9 +111,7 @@ if (isProduction) {
 async function openTestInBrowser(server, serverOptions) {
   log("Test started");
   let xunit = "";
-  const v8toIstanbul = require("v8-to-istanbul");
-  const {chromium} = require("playwright-core");
-  const browserType =  chromium;
+  const browserType = chromium;
   const browser = await browserType.launch({
     executablePath,
     headless: isTest === true,
@@ -117,8 +122,8 @@ async function openTestInBrowser(server, serverOptions) {
     page.on("console", async (msg) => {
       const txt = msg.text();
       // mocha test end
-      if (txt === "END_PASSED") { 
-        
+      if (txt === "END_PASSED") {
+
         const coverage = (await page.coverage.stopJSCoverage())
           .filter((entry) => {
             return entry.url.includes(".spec");
@@ -146,7 +151,7 @@ async function openTestInBrowser(server, serverOptions) {
             }
           }
         }
-        await mkdir(`./.nyc_output`, {recursive: true});
+        await mkdir(`./.nyc_output`, { recursive: true });
         await writeFile(
           `./.nyc_output/coverage-pw.json`,
           JSON.stringify(entries),
@@ -159,18 +164,18 @@ async function openTestInBrowser(server, serverOptions) {
         await server.close();
         await esbuild.stop();
         await browser.close();
-        
+
         log("Test complete");
         process.exit(0);
-      } else if(txt === "END_FAILED"){
+      } else if (txt === "END_FAILED") {
         log("Test failed");
         process.exit(1);
       }
-      else if(txt === "END_INCOMPLETE"){
+      else if (txt === "END_INCOMPLETE") {
         log("Test incomplete");
         process.exit(0);
       }
-      else if(txt.startsWith("REPORT ")){
+      else if (txt.startsWith("REPORT ")) {
         xunit = txt.split("REPORT ", 2)[1];
       } else {
         console.log(txt);
