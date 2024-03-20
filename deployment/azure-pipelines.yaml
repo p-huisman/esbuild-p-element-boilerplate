@@ -19,13 +19,7 @@ resources:
     type: git
     ref: 'refs/heads/master'
 
-# for mijnpfzw use this
 extends:
-  # template: deployments/templates/pfzw-build-and-deploy-to-azure.yml@PGGM.PipelineTemplates
-  template: deployments/templates/1.0.0.2/pfzw-build-and-deploy-to-azure.yml@PGGM.PipelineTemplates
+  template: deployments/templates/1.0.0.3/pfzw-build-and-deploy-to-azure.yml@PGGM.PipelineTemplates
   parameters:
     installChrome: false
-# for werkgevers use this
-#stages:
-#  - template: deployments/templates/build-stage.yml@PGGM.PipelineTemplates
-
