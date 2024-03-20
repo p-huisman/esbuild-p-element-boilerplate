@@ -9,8 +9,7 @@ This boilerplate includes:
 - [esbuild](https://esbuild.github.io/) for transpiling and bundeling typescript to javascript
 - [typescript](https://www.typescriptlang.org/) for generating typings
 - [postcss](https://postcss.org/) for css pre processing
-- [mocha](https://mochajs.org/) Test runner
-- [chai](https://www.chaijs.com/) Assertion library
+- [jasmine](https://jasmine.github.io/) Browser test runner
 - [playwright](https://playwright.dev/) Test framework
 - [husky](https://typicode.github.io/husky/) git hooks made easy, lint staged files before commit
 - [eslint](https://eslint.org/) linting
@@ -26,7 +25,7 @@ This boilerplate includes:
 - Rename the component test source file `src/p-component.spec.tsx` to the name of your custom element.
 - Rename the component stylesheet `src/p-component.css` to the name of your custom element.
 - Edit the `name`, `repository` and `types` properties in the `package.json` file to match your component.
-- In the build file `scripts/build.js` change the value `src/p-component.tsx` of constant `buildOptions.entryPoints` to the match your component source file.
+- Edit the (`scripts/build.mjs`) so the `entryPoints` and `testScripts` match your component source.
 - Change the script src and `<p-component name="World"></p-component>` markup in `demo/index.html` so your component script loads correct.
 
 ## Attributes
