@@ -16,6 +16,10 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Console } from "console";
 
+import postcss from "postcss";
+import postcssConfig from "../postcss.config.js";
+
+
 const isProduction = process.env.NODE_ENV === "production";
 const isTest = process.env.NODE_ENV === "test";
 const isTestDevelopment = process.env.NODE_ENV === "testdevelop";
@@ -23,6 +27,9 @@ const isTestDevelopment = process.env.NODE_ENV === "testdevelop";
 const entryPoints = isTest || isTestDevelopment
   ? ["src/p-component.spec.tsx"]
   : ["src/p-component.tsx"];
+const cssFiles = [
+  { src: "src/styles.css", target: "dist/styles.css" },
+]
 const testScripts = [
   "/node_modules/p-elements-core/dist/p-elements-core-modern.js",
   "/dist/p-component.spec.js",
@@ -38,6 +45,10 @@ function log(message) {
     `[${new Date().toISOString().split("T")[1].split("Z")[0]}] ${message}`,
   );
 }
+
+
+
+
 const buildOptions = {
   entryPoints,
   bundle: true,
@@ -55,11 +66,12 @@ if (isProduction) {
   buildOptions.minify = true;
   delete buildOptions.sourcemap;
   (async () => {
-    log(`Start build`);
+    log(`Build start`);
     await esbuild.build(buildOptions);
-    log(`End build`);
+    log(`Build complete`);
   })();
 } else {
+  
   const serverOptions = { host: "localhost", port: 9000 };
   buildOptions.banner = { js: client() };
   const app = express({ strict: false });
@@ -107,6 +119,15 @@ if (isProduction) {
     openTestInBrowser(server, serverOptions);
   }
 }
+
+cssFiles.forEach((file) => {
+  buildCssFile(file.src, file.target);
+  if (!isProduction) {
+    fs.watchFile(file.src, () => {
+      buildCssFile(file.src, file.target);
+    });
+  }
+});
 
 async function openTestInBrowser(server, serverOptions) {
   log("Test started");
@@ -185,5 +206,32 @@ async function openTestInBrowser(server, serverOptions) {
   }
   await page.goto(`http://localhost:${serverOptions.port}/_test`).catch(e => {
     console.info(e);
+  });
+}
+
+function buildCssFile(src, target) {
+  const sourceFile = path.join(__dirname, "../", src);
+  log(`Process css ${src} start`)
+  fs.readFile(sourceFile, (err, css) => {
+    if (err) {
+      console.error(`error reading css file ${src} ${err.message}`);
+      process.exit(1);
+    }
+    const destFile = path.join(__dirname, "../", target);
+    postcss(postcssConfig.plugins)
+      .process(css, {from: sourceFile, to: destFile})
+      .then((result) => {
+        fs.writeFile(destFile, result.css, () => true);
+        if (result.map) {
+          fs.writeFile(destFile + ".map", result.map.toString(), () => true);
+        }
+      })
+      .catch((e) => {
+        console.error(`Error processing css ${src} ${e.message}`);
+        process.exit(1);
+      })
+      .finally(() => {
+        log(`Process css ${src} complete`);
+      });
   });
 }
