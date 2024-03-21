@@ -1,0 +1,7 @@
+body {
+  background-color: darkgray;
+  color: black;
+  margin: 1em auto;
+  max-width: 900px;
+  font-family: Verdana, sans-serif;
+}
