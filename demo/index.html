@@ -7,7 +7,15 @@
     <link rel="stylesheet" href="../dist/styles.css" />
   </head>
   <body>
-    <p-component name="World"></p-component>
+    <p-component name="World">
+      <div slot="header">Greeting</div>
+      <div slot="aside">
+        <ul>
+          <li><a href="https://github.com/p-huisman/esbuild-p-element-boilerplate">Github</a></li>
+        </ul>
+      </div>
+      <div slot="footer">Peter Huisman</div>
+    </p-component>
     <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" defer></script>
     <script src="../dist/p-component.js" defer></script>
   </body>

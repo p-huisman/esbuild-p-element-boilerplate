@@ -24,25 +24,43 @@ export class PComponentElement extends CustomElement {
 
   private render = () => {
     return (
-      <div class="greeting">
-        Hello{" "}
-        <span class="greeting-name">
-          {this.name ? this.name : "P-COMPONENT"}
-        </span>
+      <div class="greeting-container">
+        <div class="greeting-header">
+          <slot name="header"></slot>
+        </div>
+        <div class="greeting-aside">
+          <slot name="aside"></slot>
+        </div>
+        <div class="greeting-main">
+          <div class="greeting">{this.#greeting}</div>
+          <slot></slot>
+        </div>
+        <div class="greeting-footer">
+          <span>(c) {new Date().getFullYear()}</span>
+          <slot name="footer"></slot>
+        </div>
       </div>
     );
   };
 
-  private onComponentClickHandler = () => {
+  get #greeting(): VNode[] {
+    return [
+      <span>Hello</span>,
+      " ",
+      <strong>{this.name ? this.name : "P-COMPONENT"}</strong>,
+    ];
+  }
+
+  #onComponentClickHandler = () => {
     this.setAttribute("clicked", "");
   };
 
   connectedCallback() {
-    this.addEventListener("click", this.onComponentClickHandler);
+    this.addEventListener("click", this.#onComponentClickHandler);
   }
 
   disconnectedCallback() {
-    this.removeEventListener("click", this.onComponentClickHandler);
+    this.removeEventListener("click", this.#onComponentClickHandler);
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
