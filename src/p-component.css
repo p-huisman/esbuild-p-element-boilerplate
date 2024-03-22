@@ -23,7 +23,7 @@
   grid-area: greeting-header;
   font-size: 1.5em;
   font-weight: bold;
-  padding: 0.4em;
+  padding: 0.5em;
   height: fit-content;
 }
 
@@ -31,13 +31,13 @@
   grid-area: greeting-aside;
   background-color: lightgray;
   color: black;
-  padding: 0.4em;
+  padding: 0.5em;
   height: fit-content;
 }
 
 .greeting-main {
   grid-area: greeting-main;
-  padding: 0.4em;
+  padding: 0.5em;
 }
 
 .greeting-footer {
@@ -45,19 +45,21 @@
   font-size: 0.8em;
   font-style: italic;
   text-align: center;
-  padding: 0.4em;
+  padding: 0.5em;
   background-color: dimgrey;
-  display: flex;
-  gap: 1em;
-  justify-content: center;
   height: fit-content;
+}
+
+.greeting-footer ::slotted(*) {
+  display: inline;
+  margin: 1em;
 }
 
 @container (min-width: 600px) {
   .greeting-container {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto 1fr auto;
-    grid-gap: 0 0.4em;
+    grid-gap: 0 0.5em;
     grid-template-areas:
       "greeting-header greeting-header"
       "greeting-aside greeting-main"

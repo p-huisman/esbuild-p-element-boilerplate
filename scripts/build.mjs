@@ -1,4 +1,3 @@
-import {CSSPlugin} from "./css-plugin.mjs";
 import {createServer} from "http";
 import express from "express";
 import serveIndex from "serve-index";
@@ -11,11 +10,13 @@ import path from "path";
 import process from "process";
 import v8toIstanbul from "v8-to-istanbul";
 import {chromium} from "playwright-core";
-import api from "./api/index.mjs";
 import {Console} from "console";
 import {rimrafSync} from "rimraf";
 import postcss from "postcss";
+import {CSSPlugin} from "./css-plugin.mjs";
 import postcssConfig from "./postcss-config.mjs";
+import api from "./api/index.mjs";
+import test from "./test/index.mjs";
 
 const projectRootDir = process.cwd();
 
@@ -71,45 +72,13 @@ function build() {
       buildOptions.banner = {js: client()};
       const app = express({strict: false});
       api(app);
-
-      // serve the browser testrunner
-      app.get("/_test", async (req, res) => {
-        let content = await readFile("./scripts/test.html", "utf-8");
-        const scripts = testFiles ? testFiles
-          .map((src) => `<script defer src="${src}"></script>`)
-          .join("\n") : "";
-        const testEntries = config.testEntryPoints
-          .map(
-            (entry) =>
-              `<script defer src="/${path.join(dist, path.parse(entry).name).replaceAll("\\", "/")}.js"></script>`,
-          )
-          .join("\n");
-        content = content.replace(
-          "<!-- scripts -->",
-          "<!-- scripts -->\r\n" +
-            scripts +
-            testEntries +
-            "\r\n<!-- end scripts -->\r\n",
-        );
-        if (isTest) {
-          content = content
-            .replace(
-              "/* onEnd */",
-              `console.log("END_" + info.overallStatus.toUpperCase());`,
-            )
-            .replace(
-              "/* addReporter */",
-              `jasmine.getEnv().addReporter(junitReporter);`,
-            );
-        }
-        res.send(content);
-      });
-
+      test(app, isTest, testFiles, config.testEntryPoints, dist);
+      app.use(express.static("./"), serveIndex("./", {icons: true}));
+      
       log(
         `Start dev server http://${serverOptions.host}:${serverOptions.port}`,
       );
-      app.use(express.static("./"), serveIndex("./", {icons: true}));
-      
+
       const server = createServer(app);
       writeToSocket = socketServer(server);
 

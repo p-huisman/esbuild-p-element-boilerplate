@@ -36,8 +36,10 @@ export class PComponentElement extends CustomElement {
           <slot></slot>
         </div>
         <div class="greeting-footer">
-          <span>(c) {new Date().getFullYear()}</span>
-          <slot name="footer"></slot>
+          <div>
+            <span>(c) {new Date().getFullYear()}</span>
+            <slot name="footer"></slot>
+          </div>
         </div>
       </div>
     );
