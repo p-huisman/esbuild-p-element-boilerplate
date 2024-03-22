@@ -25,10 +25,20 @@ export class PComponentElement extends CustomElement {
   private render = () => {
     return (
       <div class="greeting-container">
-        <div class="greeting-header">Header</div>
-        <div class="greeting-aside">Aside</div>
-        <div class="greeting-main">{this.#greeting}</div>
-        <div class="greeting-footer">Footer</div>
+        <div class="greeting-header">
+          <slot name="header"></slot>
+        </div>
+        <div class="greeting-aside">
+          <slot name="aside"></slot>
+        </div>
+        <div class="greeting-main">
+          <div class="greeting">{this.#greeting}</div>
+          <slot></slot>
+        </div>
+        <div class="greeting-footer">
+          <span>(c) {new Date().getFullYear()}</span>
+          <slot name="footer"></slot>
+        </div>
       </div>
     );
   };
