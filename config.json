@@ -1,21 +1,19 @@
 {
   "entryPoints": [
-    "src/p-component.tsx"
+    "./src/p-component.tsx"
   ],
   "testEntryPoints": [
-    "src/p-component.spec.tsx"
+    "./src/p-component.spec.tsx"
   ],
   "cssFiles": [
     {
-      "src": "src/styles.css",
-      "target": "dist/styles.css"
+      "src": "./src/styles.css",
+      "target": "styles.css"
     }
   ],
-  "testScripts": [
-    "node_modules/p-elements-core/dist/p-elements-core-modern.js",
-    "dist/p-component.spec.js"
-  ],
-  "testStyles": [
-    "dist/styles.css"
+  "dist": "./dist",
+  "target": "es6",
+  "testFiles": [
+    "./node_modules/p-elements-core/dist/p-elements-core-modern.js"
   ]
 }

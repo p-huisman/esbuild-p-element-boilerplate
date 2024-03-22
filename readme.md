@@ -25,8 +25,38 @@ This boilerplate includes:
 - Rename the component test source file `src/p-component.spec.tsx` to the name of your custom element.
 - Rename the component stylesheet `src/p-component.css` to the name of your custom element.
 - Edit the `name`, `repository` and `types` properties in the `package.json` file to match your component.
-- Edit the (`scripts/build.mjs`) so the `entryPoints` and `testScripts` match your component source.
 - Change the script src and `<p-component name="World"></p-component>` markup in `demo/index.html` so your component script loads correct.
+- Edit the (`config.json`) so it match your component source.
+
+## Config
+
+```json
+{
+  "entryPoints": ["./src/p-component.tsx"],
+  "testEntryPoints": ["./src/p-component.spec.tsx"],
+  "cssFiles": [
+    {
+      "src": "./src/styles.css",
+      "target": "styles.css"
+    }
+  ],
+  "dist": "./dist",
+  "target": "es6",
+  "testFiles": ["./node_modules/p-elements-core/dist/p-elements-core-modern.js"]
+}
+```
+
+`entrypoints` source files for the component
+
+`testEntryPoints` source test files for the component
+
+`cssFiles` array of cssFile object `{src: target}` to postcss process
+
+`dist` destination location for build output
+
+`target` build target for example `es6`
+
+`testFiles` files to add to the browser testrunner page
 
 ## Attributes
 
