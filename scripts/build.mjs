@@ -17,25 +17,22 @@ import { fileURLToPath } from 'url';
 import { Console } from "console";
 
 import postcss from "postcss";
-import postcssConfig from "../postcss.config.js";
+import postcssConfig from "./postcss-config.mjs";
 
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRootDir = process.cwd()
+
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, "../config.json")));
 const isProduction = process.env.NODE_ENV === "production";
 const isTest = process.env.NODE_ENV === "test";
 const isTestDevelopment = process.env.NODE_ENV === "testdevelop";
 
 const entryPoints = isTest || isTestDevelopment
-  ? ["src/p-component.spec.tsx"]
-  : ["src/p-component.tsx"];
-const cssFiles = [
-  { src: "src/styles.css", target: "dist/styles.css" },
-]
-const testScripts = [
-  "/node_modules/p-elements-core/dist/p-elements-core-modern.js",
-  "/dist/p-component.spec.js",
-];
+  ? config.testEntryPoints.map((entry) => path.join(projectRootDir, entry))
+  : config.entryPoints.map((entry) => path.join(projectRootDir, entry));
+const {cssFiles, testScripts} = config;
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const console = new Console(process.stdout, process.stderr);
 const edgeLocation = `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`;
 const executablePath = fs.existsSync
@@ -46,14 +43,11 @@ function log(message) {
   );
 }
 
-
-
-
 const buildOptions = {
   entryPoints,
   bundle: true,
   target: "es6",
-  outdir: "dist",
+  outdir: path.join(projectRootDir, "dist"),
   sourcemap: isTest || isTestDevelopment ? "inline" : true,
   plugins: [CSSPlugin],
   loader: {
@@ -62,6 +56,7 @@ const buildOptions = {
   },
 };
 
+
 if (isProduction) {
   buildOptions.minify = true;
   delete buildOptions.sourcemap;
@@ -69,9 +64,10 @@ if (isProduction) {
     log(`Build start`);
     await esbuild.build(buildOptions);
     log(`Build complete`);
+    buildCss(cssFiles);        
   })();
 } else {
-  
+  buildCss(cssFiles);  
   const serverOptions = { host: "localhost", port: 9000 };
   buildOptions.banner = { js: client() };
   const app = express({ strict: false });
@@ -118,16 +114,23 @@ if (isProduction) {
   if (isTest || isTestDevelopment) {
     openTestInBrowser(server, serverOptions);
   }
+  
 }
+const cssWatchList = [];
 
-cssFiles.forEach((file) => {
-  buildCssFile(file.src, file.target);
-  if (!isProduction) {
-    fs.watchFile(file.src, () => {
-      buildCssFile(file.src, file.target);
-    });
-  }
-});
+function buildCss(cssFiles) {
+  cssFiles.map((file) => {
+    return {src: path.join(projectRootDir, file.src), target: path.join(projectRootDir, file.target)}
+  }).forEach(async(file) => {
+    await buildCssFile(file.src, file.target);
+    if (!isProduction && cssWatchList.indexOf(file.src) === -1){
+      cssWatchList.push(file.src);
+      fs.watchFile(file.src, () => {
+        buildCssFile(file.src, file.target);
+      });
+    }
+  });
+}
 
 async function openTestInBrowser(server, serverOptions) {
   log("Test started");
@@ -209,29 +212,27 @@ async function openTestInBrowser(server, serverOptions) {
   });
 }
 
-function buildCssFile(src, target) {
-  const sourceFile = path.join(__dirname, "../", src);
-  log(`Process css ${src} start`)
-  fs.readFile(sourceFile, (err, css) => {
-    if (err) {
-      console.error(`error reading css file ${src} ${err.message}`);
-      process.exit(1);
-    }
-    const destFile = path.join(__dirname, "../", target);
-    postcss(postcssConfig.plugins)
-      .process(css, {from: sourceFile, to: destFile})
-      .then((result) => {
-        fs.writeFile(destFile, result.css, () => true);
-        if (result.map) {
-          fs.writeFile(destFile + ".map", result.map.toString(), () => true);
-        }
-      })
-      .catch((e) => {
-        console.error(`Error processing css ${src} ${e.message}`);
+async function buildCssFile(src, target) {
+  return new Promise((resolve) => {
+    log(`Process css ${src} start`)
+    fs.readFile(src, (err, css) => {
+      if (err) {
+        console.log(`error reading css file ${src} ${err.message}`);
         process.exit(1);
-      })
-      .finally(() => {
-        log(`Process css ${src} complete`);
-      });
+      }
+      postcss()
+        .process(css, {from: src, to: target})
+        .then((result) => {
+          fs.writeFile(target, result.css, () => true);
+        })
+        .catch((e) => {
+          console.error(`Error processing css ${src} ${e.message}`);
+          process.exit(1);
+        })
+        .finally(() => {
+          log(`Process css ${src} complete`);
+          resolve();
+        });
+    });
   });
 }

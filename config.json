@@ -1,0 +1,21 @@
+{
+  "entryPoints": [
+    "src/p-component.tsx"
+  ],
+  "testEntryPoints": [
+    "src/p-component.spec.tsx"
+  ],
+  "cssFiles": [
+    {
+      "src": "src/styles.css",
+      "target": "dist/styles.css"
+    }
+  ],
+  "testScripts": [
+    "node_modules/p-elements-core/dist/p-elements-core-modern.js",
+    "dist/p-component.spec.js"
+  ],
+  "testStyles": [
+    "dist/styles.css"
+  ]
+}

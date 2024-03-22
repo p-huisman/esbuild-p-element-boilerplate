@@ -1,10 +1,62 @@
 :host {
   color: white;
-  background-color: black;
   display: block;
-  padding: 1em;
+  width: 100%;
+  container-type: inline-size;
 }
-.greeting-name {
-  font-weight: bolder;
-  color: gray;
+
+.greeting-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto auto;
+  grid-gap: 0;
+  grid-template-areas:
+    "greeting-header"
+    "greeting-main"
+    "greeting-aside"
+    "greeting-footer";
+}
+
+.greeting-header {
+  background-color: darkgray;
+  grid-area: greeting-header;
+  font-size: 1.5em;
+  font-weight: bold;
+  padding: 0.4em;
+}
+
+.greeting-aside {
+  grid-area: greeting-aside;
+  background-color: lightgray;
+  color: black;
+  padding: 0.4em;
+}
+
+.greeting-main {
+  grid-area: greeting-main;
+  padding: 0.4em;
+}
+
+.greeting-footer {
+  grid-area: greeting-footer;
+  font-size: 0.8em;
+  font-style: italic;
+  text-align: center;
+  padding: 0.4em;
+  background-color: dimgrey;
+}
+
+@container (min-width: 600px) {
+  .greeting-container {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 400px auto;
+    grid-gap: 0 0.4em;
+    grid-template-areas:
+      "greeting-header greeting-header"
+      "greeting-aside greeting-main"
+      "greeting-footer greeting-footer";
+  }
+  .greeting-aside {
+    width: 300px;
+  }
 }
