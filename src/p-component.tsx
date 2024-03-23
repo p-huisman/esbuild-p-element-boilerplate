@@ -37,7 +37,7 @@ export class PComponentElement extends CustomElement {
         </div>
         <div class="greeting-footer">
           <div>
-            <span>(c) {new Date().getFullYear()}</span>
+            <span>© {new Date().getFullYear()}</span>
             <slot name="footer"></slot>
           </div>
         </div>
@@ -54,7 +54,9 @@ export class PComponentElement extends CustomElement {
   }
 
   #onComponentClickHandler = () => {
-    this.setAttribute("clicked", "");
+    this.hasAttribute("clicked")
+      ? this.removeAttribute("clicked")
+      : this.setAttribute("clicked", "");
   };
 
   connectedCallback() {
