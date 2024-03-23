@@ -12,8 +12,20 @@ export class PComponentElement extends CustomElement {
     );
     this.shadowRoot.appendChild(template);
     const rootElement = this.shadowRoot.querySelector("div");
-    this.createProjector(rootElement, this.render);
+    this.#getGreetingPrefix().then((greeting) => {
+      this.#greetingPrefix = greeting;
+      this.createProjector(rootElement, this.render);
+    });
   }
+
+  async #getGreetingPrefix() {
+    const response = await fetch("/api/greet")
+      .then((response) => response.json())
+      .catch((e) => e);
+    return response instanceof Error ? "Hello" : response.message;
+  }
+
+  #greetingPrefix: string;
 
   static projectorMode = "replace";
 
@@ -47,7 +59,7 @@ export class PComponentElement extends CustomElement {
 
   get #greeting(): VNode[] {
     return [
-      <span>Hello</span>,
+      <span>{this.#greetingPrefix}</span>,
       " ",
       <strong>{this.name ? this.name : "P-COMPONENT"}</strong>,
     ];
