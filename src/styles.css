@@ -15,7 +15,7 @@
 }
 
 body {
-  background-color: black;
+  background-color: green;
   color: var(--text-color);
   margin: 0 auto;
   max-width: 1200px;
