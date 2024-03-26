@@ -56,6 +56,7 @@ export async function buildBundle(config, action, broadcast) {
     sourcemap: action === "build" ? false : sourcemap,
     outdir: path.join(config.projectRootDir, config.dist),
     plugins: [CSSPlugin, buildPlugin],
+    target: config.target,
     loader: {
       ".html": "text",
       ".svg": "text",
