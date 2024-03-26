@@ -42,7 +42,11 @@ This boilerplate includes:
   ],
   "dist": "./dist",
   "target": "es6",
-  "testFiles": ["./node_modules/p-elements-core/dist/p-elements-core-modern.js"]
+  "testFiles": [
+    "./node_modules/p-elements-core/dist/p-elements-core-modern.js"
+  ],
+  "browsers": ["chromium", "firefox", "webkit"],
+  "chromiumPath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
 }
 ```
 

@@ -1,27 +1,33 @@
-import {log} from "./log.mjs";
-import {chromium, webkit, firefox} from "playwright-core";
-import {writeFile, mkdir} from "fs/promises";
+import { log } from "./log.mjs";
+import { chromium, webkit, firefox } from "playwright-core";
+import { writeFile, mkdir } from "fs/promises";
 import process from "process";
 import v8toIstanbul from "v8-to-istanbul";
 import path from "path";
 
 export const runTest = (config, action, broadcast) => {
-  // return new Promise((resolve) => {
-    const {port} = config.devServer;
-    const host = "localhost";
+  const { port } = config.devServer;
+  const host = "localhost";
+  if (action === "test") {
+    openBrowser(config, "chromium", action, `http://${host}:${port}/test.html`);
+  } else {
     const browsers = config.browsers ? config.browsers : ["chromium"];
     browsers.forEach(browser => {
       openBrowser(config, browser, action, `http://${host}:${port}/test.html`);
     });
-  //});
+  }
 };
 
-let executablePath = undefined;
+
 async function openBrowser(config, browserName, action, url) {
   const isTest = action === "test";
   log("Test started");
+  let executablePath = undefined;
+  if (config[browserName + "Path"]) {
+    executablePath = config[browserName + "Path"];
+  }
   let xunit = "";
-  let browserType = {chromium, webkit, firefox}[browserName];
+  let browserType = { chromium, webkit, firefox }[browserName];
   if (browserType === undefined) {
     browserType = chromium;
   }
@@ -62,7 +68,7 @@ async function openBrowser(config, browserName, action, url) {
             }
           }
         }
-        await mkdir(`./.nyc_output`, {recursive: true});
+        await mkdir(`./.nyc_output`, { recursive: true });
         await writeFile(
           `./.nyc_output/coverage-pw.json`,
           JSON.stringify(entries),

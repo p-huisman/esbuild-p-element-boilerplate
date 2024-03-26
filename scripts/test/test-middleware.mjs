@@ -7,7 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default function (config, action) {
   return (req, res, next) => {
-    if (req.url.startsWith("/test.html")) {
+    if (req.url === "/dev-server-client.js") {
+      const script = fs.readFileSync(path.join(__dirname, "../.dev-server-client.js"), "utf-8");
+      res.send(script);
+    } else if (req.url.startsWith("/test.html")) {
       let content = fs.readFileSync(__dirname + "/.test.html", "utf-8");
       const scripts = config.testFiles ? config.testFiles
         .map((src) => `<script defer src="${src}"></script>`)
@@ -21,9 +24,9 @@ export default function (config, action) {
       content = content.replace(
         "<!-- scripts -->",
         "<!-- scripts -->\r\n" +
-          scripts +
-          testEntries +
-          "\r\n<!-- end scripts -->\r\n",
+        scripts +
+        testEntries +
+        "\r\n<!-- end scripts -->\r\n",
       );
       if (action === "test") {
         content = content
@@ -37,7 +40,8 @@ export default function (config, action) {
           );
       }
       res.send(content);
+    } else {
+      next();
     }
-    next();
   }
 };
