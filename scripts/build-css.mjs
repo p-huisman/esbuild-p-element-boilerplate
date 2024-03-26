@@ -3,6 +3,7 @@ import postcss from "postcss";
 import fs from "fs";
 import process from "process";
 import postcssConfig from "./postcss-config.mjs";
+import {debounce} from "./debounce.mjs";
 
 export function buildCssFile(config, src, target, broadcast) {
   return new Promise((resolve) => {
@@ -22,7 +23,11 @@ export function buildCssFile(config, src, target, broadcast) {
         })
         .catch((e) => {
           log(`Error processing css ${src.replace(config.projectRootDir, "")} ${e.message}`, "error");
-          process.exit(1);
+          if (broadcast) {
+            broadcast({errors: e.message});
+          } else {
+            process.exit(1);
+          }
         })
         .finally(() => {
           log(`Process css ${src.replace(config.projectRootDir, "")} complete`);
@@ -47,9 +52,9 @@ export async function buildCss(config, action, broadcast) {
     for (const file of cssFiles) {
       if (!watchFiles.includes(file.src)) {
         watchFiles.push(file.src);
-        fs.watch(file.src, () => {
+        fs.watch(file.src, debounce(() => {
           buildCssFile(config, file.src, file.target, broadcast);
-        });
+        }, 1000));
       }
     }
   }

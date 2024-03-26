@@ -5,7 +5,7 @@ import {buildCss} from "./build-css.mjs";
 import {clean} from "./clean.mjs";
 import {startServer, broadcast} from "./dev-server.mjs";
 import {log} from "./log.mjs";
-
+import {runTest} from "./run-test.mjs";
 log("Starting " + actionParam);
 
 clean(projectConfig);
@@ -18,8 +18,9 @@ if (actionParam !== "build") {
       ]).then(() => {
         if (actionParam !== "develop") {
           log("start test");
+          runTest(projectConfig, actionParam, broadcast);
         }
-      }); 
+      });
   });
 } else {
   buildCss(projectConfig, actionParam),

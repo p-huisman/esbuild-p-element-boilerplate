@@ -4,14 +4,17 @@ import serveIndex from "serve-index";
 import http  from 'http';
 import { networkInterfaces } from 'os';
 import {console, log} from "./log.mjs";
+import testMiddleware from "./test/test-middleware.mjs";
+import {actionParam} from "./action.mjs";
+
 
 let connections;
 
 function getIpAddresses() {
-  const allifs = networkInterfaces();  
+  const allifs = networkInterfaces();
   let ifs = [];
   for (const key in allifs) {
-    allifs[key].forEach((i) => { 
+    allifs[key].forEach((i) => {
       if (i.family === "IPv4") {
         ifs.push(i.address);
       }
@@ -21,6 +24,7 @@ function getIpAddresses() {
 }
 
 const app = express({strict: false});
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ clientTracking: false, noServer: true });
 
@@ -28,9 +32,6 @@ server.on('upgrade', function (request, socket, head) {
   if (!connections) {
     connections = new Set();
   }
-  socket.on('error', (err) => {
-    console.error(err);
-  });
   wss.handleUpgrade(request, socket, head, function (ws) {
     wss.emit('connection', ws, request);
   });
@@ -45,9 +46,11 @@ wss.on('connection', function (ws) {
   });
 });
 
-app.use(express.static("./"), serveIndex("./", {icons: true}));
 
 export function startServer(config) {
+  app.use(testMiddleware(config, actionParam));
+  app.use(express.static("./"), serveIndex("./", {icons: true}));
+
   return new Promise((resolve) => {
     const {port, host} = config.devServer;
     server.listen( port ? port : 9000, host ? host : "0.0.0.0", function () {
@@ -68,7 +71,15 @@ export function broadcast(data) {
   if (!connections) {
     return;
   }
+  const messageData = JSON.stringify({
+    errors: data.errors? data.errors : [],
+    warnings: data.warnings? data.warnings : [],
+    type: "build"});
   connections.forEach((ws) => {
-    ws.send(data);
+    try{
+      ws.send(messageData);
+    } catch (e) {
+      console.error(e);
+    }
   });
 }

@@ -4,10 +4,11 @@ import {log} from "./log.mjs";
 import {CSSPlugin} from "./css-plugin.mjs";
 
 export async function buildBundle(config, action, broadcast) {
+  let isResolved = false;
   let resolve;
   const promise = new Promise((res) => {
     resolve = res;
-  }); 
+  });
   const entryPoints =
     action === "build" || action === "develop"
       ? config.entryPoints.map((entry) =>
@@ -25,22 +26,28 @@ export async function buildBundle(config, action, broadcast) {
       });
       build.onEnd((result) => {
         if (broadcast) {
-          broadcast(result);
+          broadcast(result ? result : {});
         }
         log("Build complete");
         [...result.errors, ...result.warnings].forEach((element) => {
           log(element, "error");
         });
+        if (isResolved) {
+          return;
+        }
+        isResolved = true;
         resolve();
       });
     },
   };
-  
+
+  const sourcemap = action === "develop" ?  "external" : "inline";
+
   const buildOptions = {
     entryPoints,
     bundle: true,
     minify: action === "build",
-    sourcemap: action === "build" ? false : "external",
+    sourcemap: action === "build" ? false : sourcemap,
     outdir: path.join(config.projectRootDir, config.dist),
     plugins: [CSSPlugin, buildPlugin],
     loader: {
@@ -55,5 +62,5 @@ export async function buildBundle(config, action, broadcast) {
     return promise;
   }
   return esbuild.build(buildOptions);
-  
+
 }
