@@ -21,7 +21,7 @@ if (!config) {
 export const projectConfig = {
   projectRootDir,
   devServer: {
-    port: 9090,
+    port: 9000,
   },
   browsers: ["chromium"],
   ...config,
