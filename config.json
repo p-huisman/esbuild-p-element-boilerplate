@@ -11,9 +11,15 @@
       "target": "styles.css"
     }
   ],
+  "devServer" : {
+    "port": 9000,
+    "host": "0.0.0.0"
+  },
   "dist": "./dist",
   "target": "es6",
   "testFiles": [
     "./node_modules/p-elements-core/dist/p-elements-core-modern.js"
-  ]
+  ],
+  "browsers": ["chromium"],
+  "chromiumPath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
 }

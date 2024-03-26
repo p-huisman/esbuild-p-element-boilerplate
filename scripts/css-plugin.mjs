@@ -1,22 +1,27 @@
 import postcss from "postcss";
 import postcssConfig from "./postcss-config.mjs";
-import { readFile } from "fs/promises";
+import fs from "fs";
 import esbuild from "esbuild";
-import process from "process";
+import { actionParam } from "./action.mjs";
 
-const minify = process.env.NODE_ENV === "production";
+delete postcssConfig.plugins.cssnano;
 
 export const CSSPlugin = {
   name: "CSSPlugin",
   setup(build) {
     build.onLoad({ filter: /\.css$/ }, async (args) => {
-      let css = await readFile(args.path);
-      const postcssResult = await postcss(postcssConfig.plugins).process(css, { from: undefined }).css;
-      css = await esbuild.transform(postcssResult, {
-        loader: "css",
-        minify,
+      return new Promise((resolve, reject) => {
+        let css = fs.readFileSync(args.path, "utf8");
+        postcss(postcssConfig.plugins).process(css, { from: undefined }).then((result) => {
+          esbuild.transform(result.css, {
+            loader: "css",
+            minify: actionParam === "build",
+          })
+            .then((result) => {
+              resolve({ loader: "text", contents: result.code });
+            });
+        });
       });
-      return { loader: "text", contents: css.code };
     });
   },
 };

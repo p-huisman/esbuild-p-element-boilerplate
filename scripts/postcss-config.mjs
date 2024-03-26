@@ -1,9 +1,12 @@
 import postcssPresetEnv from "postcss-preset-env";
-import minify from "postcss-minify";
-
+import cssnano from "cssnano";
 export default {
   plugins: [
-    postcssPresetEnv({grid: true}),
-    minify(),
+    postcssPresetEnv({ 
+      grid: true 
+    }),
+    cssnano({
+      preset: 'default',
+    }),
   ],
 }
