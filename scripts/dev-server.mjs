@@ -46,10 +46,8 @@ server.on('upgrade', function (request, socket, head) {
 
 wss.on('connection', function (ws) {
   connections.add(ws);
-  log("Connected to client");
   ws.on('close', function () {
     connections.delete(ws);
-    log("Disconnected from client");
   });
 });
 

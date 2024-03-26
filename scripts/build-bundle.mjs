@@ -9,7 +9,7 @@ export async function buildBundle(config, action, broadcast) {
   const promise = new Promise((res) => {
     resolve = res;
   });
-  const entryPoints =
+  let entryPoints =
     action === "build" || action === "develop"
       ? config.entryPoints.map((entry) =>
           path.join(config.projectRootDir, entry),
@@ -17,6 +17,12 @@ export async function buildBundle(config, action, broadcast) {
       : config.testEntryPoints.map((entry) =>
           path.join(config.projectRootDir, entry),
         );
+  if (action === "testdevelop") {
+    const devEntrypoints = config.entryPoints.map((entry) =>
+      path.join(config.projectRootDir, entry),
+    );
+    entryPoints = [...entryPoints, ...devEntrypoints];
+  }
 
   const buildPlugin = {
     name: "build",
