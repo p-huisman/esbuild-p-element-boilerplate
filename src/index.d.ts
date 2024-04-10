@@ -12,7 +12,10 @@ declare const _: _.UnderscoreStatic;
 
 declare const anime: (params: anime.AnimeParams) => anime.AnimeInstance;
 
-declare const Maquette: { h: H };
+declare const Maquette: {
+  h: H,
+  createProjector: (element?: HTMLElement) => Projector
+};
 
 declare module "*.css";
 
@@ -23,7 +26,5 @@ declare module "*.svg";
 declare module "*.json";
 
 interface Window {
-  Maquette?: {
-    createProjector: (projectorOptions?: ProjectorOptions) => Projector;
-  };
+  Maquette?: Maquette;
 }
