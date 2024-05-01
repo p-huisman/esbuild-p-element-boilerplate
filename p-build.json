@@ -13,7 +13,8 @@
   ],
   "devServer" : {
     "port": 9000,
-    "host": "localhost"
+    "host": "localhost",
+    "api": "./api/index.mjs"
   },
   "dist": "./dist",
   "target": "es6",
