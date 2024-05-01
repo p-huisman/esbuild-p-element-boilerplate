@@ -26,7 +26,7 @@ This boilerplate includes:
 - Rename the component stylesheet `src/p-component.css` to the name of your custom element.
 - Edit the `name`, `repository` and `types` properties in the `package.json` file to match your component.
 - Change the script src and `<p-component name="World"></p-component>` markup in `demo/index.html` so your component script loads correct.
-- Edit the (`config.json`) so it match your component source.
+- Edit the (`p-build.json`) so it match your component source.
 
 ## Config
 
