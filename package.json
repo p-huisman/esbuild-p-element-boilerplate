@@ -19,11 +19,11 @@
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@pggm/p-build": "^0.2.8",
+    "@pggm/p-build": "^0.1.12",
     "@types/animejs": "^3.1.12",
     "@types/jasmine": "^5.1.4",
     "@types/underscore": "^1.11.15",
-    "fetch-mock": "^12.0.2",
+    "fetch-mock": "^9.11.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "p-elements-core": "1.2.5",

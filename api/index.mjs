@@ -2,7 +2,7 @@
 const api = (app) => {
 
   app.get("/api/greet", (req, res) => {
-    res.send({message: "Hi"});
+    res.send({message: "hi"});
   });
 }
 

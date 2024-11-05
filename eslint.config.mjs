@@ -1,1 +1,0 @@
-import "@pggm/p-build/eslint.config.mjs";

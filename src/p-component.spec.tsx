@@ -1,5 +1,4 @@
 import {PComponentElement} from "./p-component";
-import "fetch-mock";
 import fetchMock from "fetch-mock";
 
 const waitForSelector = async (
@@ -25,14 +24,13 @@ const waitForSelector = async (
 
 const pComponentTagName = "p-component";
 
-describe("p-component custom element", async() => {
-
-  beforeAll(async() => {
-    fetchMock.mockGlobal().get("/api/greet", {message: "Hi"});
+describe("p-component custom element", () => {
+  beforeAll(() => {
+    fetchMock.mock("/api/greet", {message: "Hi"});
   });
 
-  afterAll(async() => {
-    fetchMock.unmockGlobal();
+  afterAll(() => {
+    fetchMock.restore();
   });
 
   it("is defined", async () => {
@@ -40,7 +38,7 @@ describe("p-component custom element", async() => {
     await customElements.whenDefined(pComponentTagName);
   });
 
-  describe("when no name attribute is set", async() => {
+  describe("when no name attribute is set", () => {
     it("renders the default name", async () => {
       const element = document.createElement(pComponentTagName);
       document.body.appendChild(element);
@@ -54,7 +52,7 @@ describe("p-component custom element", async() => {
     });
   });
 
- describe("when a name attribute is set", async() => {
+  describe("when a name attribute is set", () => {
     it("renders the provided name", async () => {
       const element = document.createElement(pComponentTagName);
       element.setAttribute("name", "TEST");
@@ -69,7 +67,7 @@ describe("p-component custom element", async() => {
     });
   });
 
-  describe("when clicked", async() => {
+  describe("when clicked", () => {
     it(" a clicked attribute is added", async () => {
       const element = document.createElement(pComponentTagName);
       document.body.appendChild(element);
@@ -80,10 +78,10 @@ describe("p-component custom element", async() => {
     });
   });
 
-  describe("footer", async() => {
+  describe("footer", () => {
     let element: PComponentElement;
 
-    beforeEach(async() => {
+    beforeEach(() => {
       element = document.createElement(pComponentTagName) as PComponentElement;
       const footerContent = document.createElement("div");
       footerContent.slot = "footer";
@@ -91,7 +89,7 @@ describe("p-component custom element", async() => {
       element.appendChild(footerContent);
     });
 
-    afterEach(async() => {
+    afterEach(() => {
       element.remove();
       jasmine.clock().uninstall();
     });
