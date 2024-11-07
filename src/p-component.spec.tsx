@@ -26,11 +26,11 @@ const pComponentTagName = "p-component";
 
 describe("p-component custom element", () => {
   beforeAll(() => {
-    fetchMock.mock("/api/greet", {message: "Hi"});
+    fetchMock.mockGlobal().get("/api/greet", {message: "Hi"});
   });
 
   afterAll(() => {
-    fetchMock.restore();
+    fetchMock.unmockGlobal();
   });
 
   it("is defined", async () => {
