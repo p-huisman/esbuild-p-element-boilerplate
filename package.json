@@ -12,14 +12,14 @@
     "develop": "p-build --action develop",
     "test": "p-build --action test",
     "testdevelop": "p-build --action testdevelop",
-    "lint": "eslint --fix --ext ts --ext tsx ./src",
+    "lint": "eslint --fix ./src",
     "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@pggm/p-build": "^0.2.8",
+    "@pggm/p-build": "^0.2.17",
     "@types/animejs": "^3.1.12",
     "@types/jasmine": "^5.1.4",
     "@types/underscore": "^1.11.15",

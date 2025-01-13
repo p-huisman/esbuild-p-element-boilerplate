@@ -27,9 +27,9 @@ export class PComponentElement extends CustomElement {
 
   #greetingPrefix: string;
 
-  static projectorMode = "replace";
+  static readonly projectorMode = "replace";
 
-  static observedAttributes = ["name"];
+  static readonly observedAttributes = ["name"];
 
   @RenderOnSet
   public name: string;
@@ -66,9 +66,11 @@ export class PComponentElement extends CustomElement {
   }
 
   #onComponentClickHandler = () => {
-    this.hasAttribute("clicked")
-      ? this.removeAttribute("clicked")
-      : this.setAttribute("clicked", "");
+    if (this.hasAttribute("clicked")) {
+      this.removeAttribute("clicked");
+    } else {
+      this.setAttribute("clicked", "");
+    }
   };
 
   connectedCallback() {
