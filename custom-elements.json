@@ -1,0 +1,180 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "coverage/block-navigation.js",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "coverage/prettify.js",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "coverage/sorter.js",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "dist/p-component.js",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/p-component.spec.tsx",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/p-component.tsx",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "PComponentElement",
+          "cssProperties": [
+            {
+              "description": "Controls the color of the background when clicked",
+              "name": "--greeting-clicked-background-color"
+            },
+            {
+              "description": "Controls the color the background",
+              "name": "--greeting-background-color"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "Styles the color of bar",
+              "name": "bar"
+            }
+          ],
+          "slots": [
+            {
+              "description": "This is a default/unnamed slot",
+              "name": ""
+            },
+            {
+              "description": "You can put some elements here",
+              "name": "footer"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#getGreetingPrefix",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#greetingPrefix",
+              "privacy": "private",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "projectorMode",
+              "type": {
+                "text": "string"
+              },
+              "static": true,
+              "readonly": true,
+              "default": "\"replace\""
+            },
+            {
+              "kind": "field",
+              "name": "name",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "description": "sets the name to be greeted"
+            },
+            {
+              "kind": "field",
+              "name": "render",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#greeting",
+              "privacy": "private",
+              "type": {
+                "text": "VNode[]"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "#onComponentClickHandler",
+              "privacy": "private"
+            },
+            {
+              "type": {
+                "text": "string"
+              },
+              "description": "some description",
+              "name": "greetingPrefix",
+              "kind": "field"
+            }
+          ],
+          "events": [
+            {
+              "description": "some description for custom-event",
+              "name": "custom-event"
+            },
+            {
+              "type": {
+                "text": "Event"
+              },
+              "description": "some description for typed-event",
+              "name": "typed-event"
+            },
+            {
+              "type": {
+                "text": "CustomEvent"
+              },
+              "description": "some description for typed-custom-event",
+              "name": "typed-custom-event"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "name",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "sets the name to be greeted"
+            }
+          ],
+          "superclass": {
+            "name": "CustomElement",
+            "module": "src/p-component.tsx"
+          },
+          "tagName": "p-component",
+          "customElement": true,
+          "summary": "Boilerplate for creating a custom p-elements using esbuild"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "PComponentElement",
+          "declaration": {
+            "name": "PComponentElement",
+            "module": "src/p-component.tsx"
+          }
+        }
+      ]
+    }
+  ]
+}

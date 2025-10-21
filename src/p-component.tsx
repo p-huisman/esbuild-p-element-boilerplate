@@ -1,5 +1,30 @@
 import css from "./p-component.css";
 
+/**
+ * @attr {boolean} name - sets the name to be greeted
+ * @attribute {boolean} name - sets the name to be greeted
+ *
+ * @csspart bar - Styles the color of bar
+ *
+ * @slot - This is a default/unnamed slot
+ * @slot footer - You can put some elements here
+ *
+ * @cssprop --greeting-clicked-background-color - Controls the color of the background when clicked
+ * @cssproperty --greeting-background-color - Controls the color the background
+ *
+ * @prop {string} greetingPrefix - some description
+ * @property {string} name - sets the name to be greeted
+ *
+ * @fires custom-event - some description for custom-event
+ * @fires {Event} typed-event - some description for typed-event
+ * @event {CustomEvent} typed-custom-event - some description for typed-custom-event
+ *
+ * @summary Boilerplate for creating a custom p-elements using esbuild
+ *
+ * @tag p-component
+ * @tagname p-component
+ */
+
 @CustomElementConfig({
   tagName: "p-component",
 })
