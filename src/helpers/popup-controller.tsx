@@ -48,35 +48,16 @@ export class PopupController {
   ) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        try {
-          this.positionPopup();
-        } catch (err) {
-          // In dev, surface the error to help debugging
-          try {
-            if ((globalThis as any).__PGGM_DEBUG__) console.error("[PopupController] updatePopupAfterShow position error", err);
-          } catch {}
-        }
-        try {
-          this.#options.onShown?.(el);
-        } catch {
-          // ignore
-        }
+        this.positionPopup();
+        this.#options.onShown?.(el);
 
-        try {
-          const selector = `[data-pggm-popup-id="${pid}"]`;
-          const realEl = container.querySelector
-            ? container.querySelector(selector)
-            : document.querySelector(selector);
-          if (realEl && realEl instanceof HTMLElement && realEl !== el) {
-            this.applyPopupPosition(realEl);
-            try {
-              this.#popup = realEl;
-            } catch {
-              // ignore if we cannot reassign
-            }
-          }
-        } catch {
-          /* ignore */
+        const selector = `[data-pggm-popup-id="${pid}"]`;
+        const realEl = container.querySelector
+          ? container.querySelector(selector)
+          : document.querySelector(selector);
+        if (realEl && realEl instanceof HTMLElement && realEl !== el) {
+          this.applyPopupPosition(realEl);
+          this.#popup = realEl;
         }
       });
     });
@@ -141,19 +122,9 @@ export class PopupController {
     // Give the popup a stable id so we can find it even if the UA wraps
     // or replaces the node during `showPopover()`.
     const pid = `pggm-popup-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    try {
-      this.#popup.dataset.pggmPopupId = pid;
-    } catch {
-      /* ignore */
+    if (this.#popup && typeof (this.#popup as any).dataset === "object") {
+      (this.#popup as any).dataset.pggmPopupId = pid;
     }
-    try {
-      if ((globalThis as any).__PGGM_DEBUG__) {
-        console.debug("[PopupController] open pid", pid, {
-          popupConnected: !!this.#popup?.isConnected,
-          hostHasShadow: !!(this.#host as any).shadowRoot,
-        });
-      }
-    } catch {}
 
     // Check if popup is already in the host's container (part of template).
     // Use getRootNode() when available to correctly detect ShadowRoot owners
@@ -161,14 +132,10 @@ export class PopupController {
     // `DocumentFragment`). Falling back to parentNode equality for older UAs.
     const container = (this.#host as any).shadowRoot || document.body;
     let wasAlreadyInContainer = false;
-    try {
-      const popupRoot = (this.#popup as any).getRootNode
-        ? (this.#popup as any).getRootNode()
-        : this.#popup.parentNode;
-      wasAlreadyInContainer = popupRoot === container || this.#popup.parentNode === container;
-    } catch {
-      wasAlreadyInContainer = this.#popup.parentNode === container;
-    }
+    const popupRoot = (this.#popup as any).getRootNode
+      ? (this.#popup as any).getRootNode()
+      : this.#popup.parentNode;
+    wasAlreadyInContainer = popupRoot === container || this.#popup.parentNode === container;
 
     // Attach to the host's shadow root so the popup stays scoped to the
     // component. Fall back to `document.body` only when the host has no
@@ -181,15 +148,11 @@ export class PopupController {
     }
 
     // Reset popover state - remove and re-add the attribute to clear any stale state
-    try {
+    if (this.#popup && typeof this.#popup.removeAttribute === "function") {
       this.#popup.removeAttribute("popover");
-    } catch {
-      // ignore if attribute not permitted
     }
-    try {
+    if (this.#popup && typeof this.#popup.setAttribute === "function") {
       this.#popup.setAttribute("popover", "");
-    } catch {
-      // ignore if attribute not permitted
     }
 
     // basic inline style defaults
@@ -199,30 +162,17 @@ export class PopupController {
     el.style.zIndex = "1000";
 
     // Inform optional hook before showing
-    try {
-      this.#options.onAttach?.(el);
-    } catch {
-      // swallow hook errors
-    }
+    this.#options.onAttach?.(el);
 
     // Position before showing so left/top are present for styles
-    try {
-      this.positionPopup();
-    } catch {
-      // ignore positioning failures
-    }
+    this.positionPopup();
 
     // Use Popover API if available
     const anyPop = el as any;
     if (anyPop && typeof anyPop.showPopover === "function") {
       try {
-        if ((globalThis as any).__PGGM_DEBUG__) console.debug("[PopupController] calling showPopover", el);
         anyPop.showPopover();
-        if ((globalThis as any).__PGGM_DEBUG__) console.debug("[PopupController] showPopover returned", el);
-      } catch (err) {
-        try {
-          if ((globalThis as any).__PGGM_DEBUG__) console.error("[PopupController] showPopover error", err);
-        } catch {}
+      } catch {
         // ignore showPopover errors from UA
       }
     }
@@ -286,9 +236,10 @@ export class PopupController {
     this.#popupWasAppended = false;
 
     if (this.#outsideHandler) {
-      document.removeEventListener("mousedown", this.#outsideHandler, true);
-      document.removeEventListener("click", this.#outsideHandler, false);
-      document.removeEventListener("touchstart", this.#outsideHandler as any);
+      if (typeof document?.removeEventListener === "function") {
+        document.removeEventListener("pointerdown", this.#outsideHandler, true);
+        document.removeEventListener("touchstart", this.#outsideHandler as any, true);
+      }
       this.#outsideHandler = undefined;
     }
     if (this.#keydownHandler) {
@@ -314,12 +265,11 @@ export class PopupController {
       // Allow components to provide an insideSelector to treat more nodes as inside
       if (this.#options.insideSelector) {
         const found = nodes.some((n) => {
+          if (!(n instanceof Element)) return false;
+          const closest = (n as Element).closest;
+          if (typeof closest !== "function") return false;
           try {
-            if (!(n instanceof Element)) return false;
-            return Boolean(
-              n instanceof Element &&
-              n.closest?.(this.#options.insideSelector!),
-            );
+            return Boolean((n as Element).closest(this.#options.insideSelector!));
           } catch {
             return false;
           }
@@ -340,20 +290,14 @@ export class PopupController {
       requestAnimationFrame(() => {
         // Use pointerdown (covers mouse/touch/pen) with capture to observe
         // the event before other handlers. Add touchstart as a fallback for
-        // environments without pointer events. Keep listeners passive when
-        // appropriate.
-        try {
+        // environments without pointer events.
+        if (typeof document?.addEventListener === "function") {
           document.addEventListener("pointerdown", this.#outsideHandler!, true);
-        } catch {
-          /* ignore */
-        }
-        try {
-          document.addEventListener("touchstart", this.#outsideHandler!, {
-            passive: true,
-            capture: true,
-          } as AddEventListenerOptions);
-        } catch {
-          /* ignore */
+          document.addEventListener(
+            "touchstart",
+            this.#outsideHandler!,
+            {passive: true, capture: true} as AddEventListenerOptions,
+          );
         }
       });
     });
@@ -430,11 +374,7 @@ export class PopupController {
   }
 
   setHorizontalAlign(align: "auto" | "left" | "right" | "center") {
-    try {
-      this.#options.horizontalAlign = align;
-    } catch {
-      /* ignore */
-    }
+    this.#options.horizontalAlign = align;
   }
 
   private addRepositionListeners() {
@@ -445,11 +385,7 @@ export class PopupController {
     let scheduled = false;
     const runner = () => {
       scheduled = false;
-      try {
-        this.positionPopup();
-      } catch {
-        /* ignore */
-      }
+      this.positionPopup();
     };
     this.#repositionHandler = () => {
       if (!scheduled) {

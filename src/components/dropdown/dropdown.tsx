@@ -30,6 +30,9 @@ export class DropdownElement extends CustomElement {
   
   static readonly style =  css;
 
+  /** Counter for auto-generated menu ids */
+  private static menuIdCounter = 0;
+
   /** Global list of open dropdowns */
   private static openDropdowns: DropdownElement[] = [];
 
@@ -129,38 +132,30 @@ export class DropdownElement extends CustomElement {
       horizontalAlign: this.align || "auto",
       onShown: (popupEl) => {
         // Attach to the real element if the UA wrapped/replaced our node.
-        try {
-          const pid = popupEl?.dataset.pggmPopupId;
-          const container = (this as any).shadowRoot || document.body;
-          const realEl =
-            pid && container?.querySelector
-              ? container.querySelector(`[data-pggm-popup-id="${pid}"]`) ||
-                popupEl
-              : popupEl;
-          if (realEl && realEl instanceof HTMLElement) {
-            this.attachedToggleElement = realEl;
-            this.attachedToggleElement.addEventListener(
-              "toggle",
-              this.handlePopoverToggle as EventListener,
-            );
-          }
-        } catch {
-          /* ignore */
+        const pid = popupEl?.dataset.pggmPopupId;
+        const container = (this as any).shadowRoot || document.body;
+        const realEl =
+          pid && container?.querySelector
+            ? container.querySelector(`[data-pggm-popup-id="${pid}"]`) ||
+              popupEl
+            : popupEl;
+        if (realEl && realEl instanceof HTMLElement && typeof realEl.addEventListener === "function") {
+          this.attachedToggleElement = realEl;
+          this.attachedToggleElement.addEventListener(
+            "toggle",
+            this.handlePopoverToggle as EventListener,
+          );
         }
         requestAnimationFrame(() => this.updateMenuPosition());
       },
       onClose: (_popup) => {
         // remove any attached toggle listener
-        try {
-          if (this.attachedToggleElement) {
-            this.attachedToggleElement.removeEventListener(
-              "toggle",
-              this.handlePopoverToggle as EventListener,
-            );
-            this.attachedToggleElement = null;
-          }
-        } catch {
-          /* ignore */
+        if (this.attachedToggleElement && typeof this.attachedToggleElement.removeEventListener === "function") {
+          this.attachedToggleElement.removeEventListener(
+            "toggle",
+            this.handlePopoverToggle as EventListener,
+          );
+          this.attachedToggleElement = null;
         }
         if (this.open) this.open = false;
       },
@@ -169,6 +164,17 @@ export class DropdownElement extends CustomElement {
     // Capture a stable reference to the menu element before PopupController
     // may move or remove it from the shadow DOM so we can re-open later.
     this.menuRef = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLDivElement) || null;
+
+    // Ensure the menu has a stable, unique id so aria-controls can be set
+    // reliably. Do not overwrite a consumer-provided id, but replace the
+    // default template id ('menu') so multiple instances don't clash.
+    if (this.menuRef) {
+      const cur = this.menuRef.id;
+      if (!cur || cur === "menu") {
+        DropdownElement.menuIdCounter += 1;
+        this.menuRef.id = `pggm-menu-${DropdownElement.menuIdCounter}`;
+      }
+    }
 
     // Watch for slot changes inside the menu so the focus controller can
     // refresh its element list when slotted content changes.
@@ -222,11 +228,7 @@ export class DropdownElement extends CustomElement {
     }
 
     if (propertyName === "align" && oldValue !== newValue) {
-      try {
-        this.popupController?.setHorizontalAlign((this.align as any) || "auto");
-      } catch {
-        /* ignore */
-      }
+      this.popupController?.setHorizontalAlign((this.align as any) || "auto");
       if (this.open) {
         requestAnimationFrame(() => {
           this.updateMenuPosition();
@@ -366,21 +368,13 @@ export class DropdownElement extends CustomElement {
     // Use mousedown/touchstart instead of click to detect before click events fire
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Use pointerdown for unified pointer support; add touchstart as a
-        // fallback for older browsers. Use capture so we observe the event
-        // before other handlers and can close reliably.
-        try {
+        if (typeof document?.addEventListener === "function") {
           document.addEventListener("pointerdown", this.outsideClickHandler!, true);
-        } catch {
-          /* ignore */
-        }
-        try {
-          document.addEventListener("touchstart", this.outsideClickHandler!, {
-            passive: true,
-            capture: true,
-          } as AddEventListenerOptions);
-        } catch {
-          /* ignore */
+          document.addEventListener(
+            "touchstart",
+            this.outsideClickHandler!,
+            {passive: true, capture: true} as AddEventListenerOptions,
+          );
         }
       });
     });
@@ -395,31 +389,19 @@ export class DropdownElement extends CustomElement {
     // Ensure PopupController has a chance to reposition after any DOM moves it performs
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        try {
-          this.popupController?.positionPopup();
-        } catch {
-          /* ignore */
-        }
+        this.popupController?.positionPopup();
       });
     });
 
     // Update ARIA on trigger and popup
-    try {
-      this.updateTriggerA11y(true);
-      (popupToOpen as HTMLElement).setAttribute("aria-hidden", "false");
-    } catch {
-      /* ignore */
-    }
+    this.updateTriggerA11y(true);
+    (popupToOpen as HTMLElement).setAttribute("aria-hidden", "false");
 
-    // Log popup state after opening to help diagnose visibility issues
+    // small async read to stabilize layout (no-op)
     setTimeout(() => {
-      try {
-        const el = popupToOpen as HTMLElement;
-        const style = globalThis.getComputedStyle(el);
-        const rect = el.getBoundingClientRect();
-      } catch{
-        /* ignore */
-      }
+      const el = popupToOpen as HTMLElement;
+      globalThis.getComputedStyle?.(el);
+      el.getBoundingClientRect?.();
     }, 50);
 
     // Update focus group controller with new items and focus the first one
@@ -457,66 +439,35 @@ export class DropdownElement extends CustomElement {
     // Remove outside click handler (remove the event types that may have
     // been attached). Be tolerant if some were never added.
     if (this.outsideClickHandler) {
-      try {
-        try {
-          document.removeEventListener("pointerdown", this.outsideClickHandler, true);
-        } catch {
-          /* ignore */
-        }
-        try {
-          document.removeEventListener("touchstart", this.outsideClickHandler as any, true);
-        } catch {
-          /* ignore */
-        }
-        try {
-          document.removeEventListener("click", this.outsideClickHandler);
-        } catch {
-          /* ignore */
-        }
-      } catch {
-        /* ignore */
+      if (typeof document?.removeEventListener === "function") {
+        document.removeEventListener("pointerdown", this.outsideClickHandler, true);
+        document.removeEventListener("touchstart", this.outsideClickHandler as any, true);
       }
       this.outsideClickHandler = undefined;
     }
 
     // Remove keyboard handler
     if (this.keyboardHandler) {
-      try {
-        this.removeEventListener("keydown", this.keyboardHandler);
-      } catch {
-        /* ignore */
-      }
+      this.removeEventListener("keydown", this.keyboardHandler);
       this.keyboardHandler = undefined;
     }
 
     // Remove scroll listeners
     if (this.removeScrollListeners) {
-      try {
-        this.removeScrollListeners();
-      } catch {
-        /* ignore */
-      }
+      this.removeScrollListeners();
       this.removeScrollListeners = undefined;
     }
 
     // Ensure popup controller is asked to close so it can clean up any
     // appended nodes or internal state.
-    try {
-      this.popupController?.close();
-    } catch {
-      /* ignore */
-    }
+    this.popupController?.close();
 
     // If PopupController removed the menu element from the DOM when closing
     // (it removes only when it appended the node), restore the original
     // menu node back into our shadowRoot so the component template remains
     // intact and the dropdown can be reopened later.
-    try {
-      if (this.menuRef && !this.menuRef.isConnected && this.shadowRoot) {
-        this.shadowRoot.appendChild(this.menuRef);
-      }
-    } catch {
-      /* ignore */
+    if (this.menuRef && !this.menuRef.isConnected && this.shadowRoot) {
+      this.shadowRoot.appendChild(this.menuRef);
     }
 
     // Restore focus to the trigger element
@@ -539,33 +490,26 @@ export class DropdownElement extends CustomElement {
     // handle environments without a shadowRoot or timing issues where the
     // slot isn't yet available.
     let trigger = this.getTrigger();
-    if (!trigger) {
-      try {
-        trigger = (this.querySelector('[slot="trigger"]') as HTMLElement) || null;
-      } catch {
-        trigger = null;
-      }
+    if (!trigger && typeof this.querySelector === "function") {
+      trigger = (this.querySelector('[slot="trigger"]') as HTMLElement) || null;
     }
     if (!trigger) return;
-    try {
-      // Do not overwrite user-provided attributes. Set aria-haspopup and
-      // aria-controls only when they are not already present on the trigger.
-      if (!trigger.hasAttribute("aria-haspopup")) {
-        trigger.setAttribute("aria-haspopup", "menu");
-      }
-      const expanded = typeof openState === "boolean" ? openState : !!this.open;
-      // aria-expanded should reflect component state; keep it in sync.
+    // Do not overwrite user-provided attributes. Set aria-haspopup and
+    // aria-controls only when they are not already present on the trigger.
+    if (!trigger.hasAttribute("aria-haspopup") && typeof trigger.setAttribute === "function") {
+      trigger.setAttribute("aria-haspopup", "menu");
+    }
+    const expanded = typeof openState === "boolean" ? openState : !!this.open;
+    if (typeof trigger.setAttribute === "function") {
       trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      // Set aria-controls only when not provided by the consumer and we can
-      // determine an id for the menu.
-      if (!trigger.hasAttribute("aria-controls")) {
-        const menuEl = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLElement) || null;
-        if (menuEl && menuEl.id) {
-          trigger.setAttribute("aria-controls", menuEl.id);
-        }
+    }
+    // Set aria-controls only when not provided by the consumer and we can
+    // determine an id for the menu.
+    if (!trigger.hasAttribute("aria-controls")) {
+      const menuEl = this.menuElement || this.menuRef || (this.shadowRoot?.querySelector("#menu") as HTMLElement) || null;
+      if (menuEl && menuEl.id && typeof trigger.setAttribute === "function") {
+        trigger.setAttribute("aria-controls", menuEl.id);
       }
-    } catch {
-      /* ignore */
     }
   }
 
@@ -765,11 +709,7 @@ export class DropdownElement extends CustomElement {
 
   @Bind
   private handleTriggerSlotChange(): void {
-    try {
-      this.updateTriggerA11y(false);
-    } catch {
-      /* ignore */
-    }
+    this.updateTriggerA11y(false);
   }
 
   /**
@@ -820,20 +760,9 @@ export class DropdownElement extends CustomElement {
     if (toggleEvent.newState === "closed") {
       // Clean up when popover closes
       if (this.outsideClickHandler) {
-        try {
+        if (typeof document?.removeEventListener === "function") {
           document.removeEventListener("pointerdown", this.outsideClickHandler, true);
-        } catch {
-          /* ignore */
-        }
-        try {
           document.removeEventListener("touchstart", this.outsideClickHandler as any, true);
-        } catch {
-          /* ignore */
-        }
-        try {
-          document.removeEventListener("click", this.outsideClickHandler);
-        } catch {
-          /* ignore */
         }
         this.outsideClickHandler = undefined;
       }
@@ -847,11 +776,7 @@ export class DropdownElement extends CustomElement {
   @Bind
   private handleItemSelect(event: CustomEvent): void {
     // Prevent ancestor dropdowns from also handling this selection
-    try {
-      event.stopPropagation();
-    } catch {
-      /* ignore */
-    }
+    if (typeof event.stopPropagation === "function") event.stopPropagation();
 
     // Re-emit a single selection event for consumers (legacy `dropdownSelect`)
     this.dispatchEvent(

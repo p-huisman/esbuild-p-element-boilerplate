@@ -262,84 +262,85 @@ export class DropdownItemElement extends CustomElement {
   private showSubmenu(focusFirst = false): void {
     if (!this.submenuElement || this.isSubmenuOpen) return;
 
+    // Apply critical styles before showing
+    Object.assign(this.submenuElement.style, {
+      minWidth: "180px",
+      width: "max-content",
+    });
+
+    // showPopover may throw in some UAs; guard the call
     try {
-      // Apply critical styles before showing
-      Object.assign(this.submenuElement.style, {
-        minWidth: "180px",
-        width: "max-content",
-      });
-
       this.submenuElement.showPopover();
-      this.isSubmenuOpen = true;
-
-      // Add click listener to close submenu when clicking outside
-      const closeSubmenuHandler = (event: MouseEvent) => {
-        const target = event.target as Node;
-        if (!this.submenuElement?.contains(target) && !this.contains(target)) {
-          this.hideSubmenu();
-          document.removeEventListener("click", closeSubmenuHandler);
-        }
-      };
-
-      // Delay adding the listener to avoid immediately closing
-      requestAnimationFrame(() => {
-        document.addEventListener("click", closeSubmenuHandler);
-      });
-
-      // Wait for layout to settle before positioning
-      requestAnimationFrame(() => {
-        if (!this.submenuElement) return;
-
-        // Position submenu - check if there's space on the right
-        const rect = this.getBoundingClientRect();
-        const submenuWidth = this.submenuElement.offsetWidth;
-        const spaceOnRight = window.innerWidth - rect.right;
-        const spaceOnLeft = rect.left;
-
-        // Position on the left if not enough space for submenu on the right
-        if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
-          this.submenuElement.style.left = `${rect.left - submenuWidth}px`;
-        } else {
-          this.submenuElement.style.left = `${rect.right}px`;
-        }
-
-        // Compute clamped position so submenu stays within the viewport
-        const submenuHeight = this.submenuElement.offsetHeight;
-        let left: number;
-        if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
-          left = rect.left - submenuWidth;
-        } else {
-          left = rect.right;
-        }
-
-        // Vertical: prefer aligning top with the parent item, but clamp
-        // so the submenu does not extend off the viewport.
-        let top = rect.top;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // Clamp left within viewport with 8px margin
-        left = Math.min(Math.max(8, left), Math.max(8, viewportWidth - submenuWidth - 8));
-
-        // Clamp top within viewport with 8px margin
-        if (top + submenuHeight + 8 > viewportHeight) {
-          // try to shift upwards so submenu fits
-          top = Math.max(8, viewportHeight - submenuHeight - 8);
-        }
-        top = Math.max(8, top);
-
-        this.submenuElement.style.left = `${left}px`;
-        this.submenuElement.style.top = `${top}px`;
-
-        // Focus first item when opening the submenu
-        if (focusFirst) {
-          this.#submenuFocusController.updateElements();
-          this.#submenuFocusController.focusElement();
-        }
-      });
-    } catch{
-      /* ignore */
+    } catch {
+      // ignore
     }
+    this.isSubmenuOpen = true;
+
+    // Add click listener to close submenu when clicking outside
+    const closeSubmenuHandler = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!this.submenuElement?.contains(target) && !this.contains(target)) {
+        this.hideSubmenu();
+        document.removeEventListener("click", closeSubmenuHandler);
+      }
+    };
+
+    // Delay adding the listener to avoid immediately closing
+    requestAnimationFrame(() => {
+      document.addEventListener("click", closeSubmenuHandler);
+    });
+
+    // Wait for layout to settle before positioning
+    requestAnimationFrame(() => {
+      if (!this.submenuElement) return;
+
+      // Position submenu - check if there's space on the right
+      const rect = this.getBoundingClientRect();
+      const submenuWidth = this.submenuElement.offsetWidth;
+      const spaceOnRight = window.innerWidth - rect.right;
+      const spaceOnLeft = rect.left;
+
+      // Position on the left if not enough space for submenu on the right
+      if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
+        this.submenuElement.style.left = `${rect.left - submenuWidth}px`;
+      } else {
+        this.submenuElement.style.left = `${rect.right}px`;
+      }
+
+      // Compute clamped position so submenu stays within the viewport
+      const submenuHeight = this.submenuElement.offsetHeight;
+      let left: number;
+      if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
+        left = rect.left - submenuWidth;
+      } else {
+        left = rect.right;
+      }
+
+      // Vertical: prefer aligning top with the parent item, but clamp
+      // so the submenu does not extend off the viewport.
+      let top = rect.top;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Clamp left within viewport with 8px margin
+      left = Math.min(Math.max(8, left), Math.max(8, viewportWidth - submenuWidth - 8));
+
+      // Clamp top within viewport with 8px margin
+      if (top + submenuHeight + 8 > viewportHeight) {
+        // try to shift upwards so submenu fits
+        top = Math.max(8, viewportHeight - submenuHeight - 8);
+      }
+      top = Math.max(8, top);
+
+      this.submenuElement.style.left = `${left}px`;
+      this.submenuElement.style.top = `${top}px`;
+
+      // Focus first item when opening the submenu
+      if (focusFirst) {
+        this.#submenuFocusController.updateElements();
+        this.#submenuFocusController.focusElement();
+      }
+    });
   }
 
   /**
