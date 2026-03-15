@@ -50,8 +50,11 @@ export class PopupController {
       requestAnimationFrame(() => {
         try {
           this.positionPopup();
-        } catch {
-          // ignore
+        } catch (err) {
+          // In dev, surface the error to help debugging
+          try {
+            if ((globalThis as any).__PGGM_DEBUG__) console.error("[PopupController] updatePopupAfterShow position error", err);
+          } catch {}
         }
         try {
           this.#options.onShown?.(el);
@@ -143,6 +146,14 @@ export class PopupController {
     } catch {
       /* ignore */
     }
+    try {
+      if ((globalThis as any).__PGGM_DEBUG__) {
+        console.debug("[PopupController] open pid", pid, {
+          popupConnected: !!this.#popup?.isConnected,
+          hostHasShadow: !!(this.#host as any).shadowRoot,
+        });
+      }
+    } catch {}
 
     // Check if popup is already in the host's container (part of template).
     // Use getRootNode() when available to correctly detect ShadowRoot owners
@@ -205,8 +216,13 @@ export class PopupController {
     const anyPop = el as any;
     if (anyPop && typeof anyPop.showPopover === "function") {
       try {
+        if ((globalThis as any).__PGGM_DEBUG__) console.debug("[PopupController] calling showPopover", el);
         anyPop.showPopover();
-      } catch {
+        if ((globalThis as any).__PGGM_DEBUG__) console.debug("[PopupController] showPopover returned", el);
+      } catch (err) {
+        try {
+          if ((globalThis as any).__PGGM_DEBUG__) console.error("[PopupController] showPopover error", err);
+        } catch {}
         // ignore showPopover errors from UA
       }
     }
@@ -322,11 +338,23 @@ export class PopupController {
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        document.addEventListener("mousedown", this.#outsideHandler!, true);
-        document.addEventListener("click", this.#outsideHandler!, false);
-        document.addEventListener("touchstart", this.#outsideHandler!, {
-          passive: true,
-        } as any);
+        // Use pointerdown (covers mouse/touch/pen) with capture to observe
+        // the event before other handlers. Add touchstart as a fallback for
+        // environments without pointer events. Keep listeners passive when
+        // appropriate.
+        try {
+          document.addEventListener("pointerdown", this.#outsideHandler!, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.addEventListener("touchstart", this.#outsideHandler!, {
+            passive: true,
+            capture: true,
+          } as AddEventListenerOptions);
+        } catch {
+          /* ignore */
+        }
       });
     });
 
@@ -354,10 +382,12 @@ export class PopupController {
     const popupHeight = popup.offsetHeight || 200;
 
     // Horizontal placement: respect configured horizontalAlign when
-    // aligning relative to the anchor/host. Clamp to viewport with a small margin.
+    // available. Mirror logic from applyPopupPosition to ensure consistent
+    // placement between manual and replaced popup nodes.
     const align = this.#options.horizontalAlign || "left";
     const spaceOnRight = globalThis.innerWidth - hostRect.left;
     const spaceOnLeft = hostRect.right;
+
     let x: number;
     if (align === "right") {
       x = hostRect.right - popupWidth;
@@ -409,7 +439,24 @@ export class PopupController {
 
   private addRepositionListeners() {
     if (this.#repositionHandler) return;
-    this.#repositionHandler = () => this.positionPopup();
+    // Throttle reposition calls using requestAnimationFrame so rapid scroll
+    // or resize events don't cause repeated layout work. We schedule a
+    // single rAF per animation frame and call positionPopup once.
+    let scheduled = false;
+    const runner = () => {
+      scheduled = false;
+      try {
+        this.positionPopup();
+      } catch {
+        /* ignore */
+      }
+    };
+    this.#repositionHandler = () => {
+      if (!scheduled) {
+        scheduled = true;
+        requestAnimationFrame(runner);
+      }
+    };
     globalThis.addEventListener("resize", this.#repositionHandler, {
       passive: true,
     });

@@ -81,6 +81,9 @@ export class DropdownElement extends CustomElement {
   /** Reference to the trigger slot element for slotchange handling */
   private triggerSlot?: HTMLSlotElement | null;
 
+  /** Reference to the menu's default slot for slotchange handling */
+  private menuSlot?: HTMLSlotElement | null;
+
   /** Handler for outside clicks */
   private outsideClickHandler?: (event: Event) => void;
 
@@ -173,11 +176,29 @@ export class DropdownElement extends CustomElement {
       this.menuRef = null;
     }
 
+    // Watch for slot changes inside the menu so the focus controller can
+    // refresh its element list when slotted content changes.
+    try {
+      this.menuSlot = (this.menuRef?.querySelector("slot") as HTMLSlotElement) || null;
+      if (this.menuSlot) {
+        this.menuSlot.addEventListener("slotchange", () => {
+          try {
+            this.#focusGroupController.updateElements();
+          } catch (err) {
+            try { if ((globalThis as any).__PGGM_DEBUG__) console.error('menu slotchange handler failed', err); } catch {}
+          }
+        });
+      }
+    } catch (err) {
+      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('menuSlot setup failed', err); } catch {}
+      this.menuSlot = null;
+    }
+
     // Initialize ARIA attributes on the trigger based on current state
     try {
       this.updateTriggerA11y(false);
-    } catch {
-      /* ignore */
+    } catch (err) {
+      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('updateTriggerA11y failed', err); } catch {}
     }
 
     // Watch for changes to the trigger slot so we can apply ARIA attributes
@@ -186,7 +207,8 @@ export class DropdownElement extends CustomElement {
       if (this.triggerSlot) {
         this.triggerSlot.addEventListener('slotchange', this.handleTriggerSlotChange as any);
       }
-    } catch {
+    } catch (err) {
+      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('triggerSlot setup failed', err); } catch {}
       this.triggerSlot = null;
     }
   }
@@ -202,6 +224,12 @@ export class DropdownElement extends CustomElement {
 
     try {
       if (this.triggerSlot) this.triggerSlot.removeEventListener('slotchange', this.handleTriggerSlotChange as any);
+    } catch {
+      /* ignore */
+    }
+
+    try {
+      if (this.menuSlot) this.menuSlot.removeEventListener('slotchange', () => this.#focusGroupController.updateElements());
     } catch {
       /* ignore */
     }
@@ -370,10 +398,22 @@ export class DropdownElement extends CustomElement {
     // Use mousedown/touchstart instead of click to detect before click events fire
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        document.addEventListener("mousedown", this.outsideClickHandler!);
-        document.addEventListener("touchstart", this.outsideClickHandler!, {
-          passive: true,
-        });
+        // Use pointerdown for unified pointer support; add touchstart as a
+        // fallback for older browsers. Use capture so we observe the event
+        // before other handlers and can close reliably.
+        try {
+          document.addEventListener("pointerdown", this.outsideClickHandler!, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.addEventListener("touchstart", this.outsideClickHandler!, {
+            passive: true,
+            capture: true,
+          } as AddEventListenerOptions);
+        } catch {
+          /* ignore */
+        }
       });
     });
 
@@ -409,21 +449,20 @@ export class DropdownElement extends CustomElement {
         const el = popupToOpen as HTMLElement;
         const style = globalThis.getComputedStyle(el);
         const rect = el.getBoundingClientRect();
-        
       } catch{
         /* ignore */
       }
     }, 50);
 
     // Update focus group controller with new items and focus the first one
-    // Use setTimeout to ensure slot has assigned elements
-    setTimeout(() => {
+    // Use requestAnimationFrame to ensure slot has assigned elements deterministically
+    requestAnimationFrame(() => {
       this.#focusGroupController.updateElements();
       const items = this.getMenuItems();
       if (items.length > 0) {
         this.#focusGroupController.focusElement();
       }
-    }, 0);
+    });
 
     this.dispatchEvent(
       new CustomEvent("dropdownOpen", {
@@ -451,9 +490,21 @@ export class DropdownElement extends CustomElement {
     // been attached). Be tolerant if some were never added.
     if (this.outsideClickHandler) {
       try {
-        document.removeEventListener("mousedown", this.outsideClickHandler);
-        document.removeEventListener("touchstart", this.outsideClickHandler);
-        document.removeEventListener("click", this.outsideClickHandler);
+        try {
+          document.removeEventListener("pointerdown", this.outsideClickHandler, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.removeEventListener("touchstart", this.outsideClickHandler as any, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.removeEventListener("click", this.outsideClickHandler);
+        } catch {
+          /* ignore */
+        }
       } catch {
         /* ignore */
       }
@@ -596,16 +647,27 @@ export class DropdownElement extends CustomElement {
     const menu = this.menuElement;
     const triggerRect = trigger.getBoundingClientRect();
 
-    // Measure without causing reflow by keeping the element visually hidden
-    // and moved off-screen via transform. This avoids changing `display` which
-    // can trigger layout thrash.
+    // Prefer measuring without changing `display` to avoid reflows, using
+    // visibility + transform. However when the element is `display: none`
+    // offsetWidth/offsetHeight will be zero, so fall back to temporarily
+    // showing the element to measure.
+    const computedDisplay = getComputedStyle(menu).display;
     const prevVisibility = menu.style.visibility;
     const prevTransform = menu.style.transform;
     const prevPointerEvents = menu.style.pointerEvents;
+    const prevDisplay = menu.style.display;
+    let usedTemporaryDisplay = false;
     try {
-      menu.style.visibility = "hidden";
-      menu.style.pointerEvents = "none";
-      menu.style.transform = "translate3d(-9999px,-9999px,0)";
+      if (computedDisplay === "none") {
+        // Temporarily show for measurement
+        menu.style.display = "block";
+        usedTemporaryDisplay = true;
+      } else {
+        menu.style.visibility = "hidden";
+        menu.style.pointerEvents = "none";
+        menu.style.transform = "translate3d(-9999px,-9999px,0)";
+      }
+
       const menuHeight = menu.offsetHeight;
       const menuWidth = menu.offsetWidth;
 
@@ -617,22 +679,20 @@ export class DropdownElement extends CustomElement {
         top: `${y}px`,
         maxWidth: `${globalThis.innerWidth - x - 16}px`,
         maxHeight: `${globalThis.innerHeight - y - 16}px`,
-        transform: prevTransform || "",
-        visibility: prevVisibility || "",
-        pointerEvents: prevPointerEvents || "",
       });
     } finally {
-      // Ensure we restore values if an error occurred measuring
+      // Restore temporary styles
       try {
-        menu.style.transform = prevTransform || "";
-        menu.style.visibility = prevVisibility || "";
-        menu.style.pointerEvents = prevPointerEvents || "";
+        if (usedTemporaryDisplay) {
+          menu.style.display = prevDisplay || "";
+        } else {
+          menu.style.transform = prevTransform || "";
+          menu.style.visibility = prevVisibility || "";
+          menu.style.pointerEvents = prevPointerEvents || "";
+        }
       } catch {
         /* ignore */
       }
-      // Recompute measured sizes in case they are needed elsewhere
-      const menuHeight = menu.offsetHeight;
-      const menuWidth = menu.offsetWidth;
     }
   }
 
@@ -763,23 +823,23 @@ export class DropdownElement extends CustomElement {
         this.open = true;
       }
       // Defer to ensure slotted items are available
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         this.#focusGroupController.updateElements();
         this.#focusGroupController.focusElement();
-      }, 0);
+      });
     } else if (key === "ArrowUp") {
       event.preventDefault();
       event.stopPropagation();
       if (!this.open) {
         this.open = true;
       }
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         this.#focusGroupController.updateElements();
         const items = this.getMenuItems();
         if (items.length > 0) {
           this.#focusGroupController.focusElement(items[items.length - 1] as any);
         }
-      }, 0);
+      });
     }
   }
 
@@ -792,7 +852,21 @@ export class DropdownElement extends CustomElement {
     if (toggleEvent.newState === "closed") {
       // Clean up when popover closes
       if (this.outsideClickHandler) {
-        document.removeEventListener("click", this.outsideClickHandler);
+        try {
+          document.removeEventListener("pointerdown", this.outsideClickHandler, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.removeEventListener("touchstart", this.outsideClickHandler as any, true);
+        } catch {
+          /* ignore */
+        }
+        try {
+          document.removeEventListener("click", this.outsideClickHandler);
+        } catch {
+          /* ignore */
+        }
         this.outsideClickHandler = undefined;
       }
       this.open = false;
@@ -821,15 +895,40 @@ export class DropdownElement extends CustomElement {
     const menu = this.menuElement;
     if (!menu) return [];
 
-    // Find slotted dropdown items
+    // Find slotted dropdown items. Use assignedNodes(flatten:true) to
+    // collect nested nodes (wrapper elements) and also query within those
+    // nodes for nested `pggm-dropdown-item` elements to support wrapped
+    // submenu content.
     const slot = menu.querySelector("slot") as HTMLSlotElement;
     if (!slot) return [];
 
-    const assignedElements = slot.assignedElements();
-    return assignedElements.filter(
-      (el) =>
-        el.tagName === "PGGM-DROPDOWN-ITEM" && !el.hasAttribute("disabled"),
-    ) as HTMLElement[];
+    const assigned = slot.assignedNodes({flatten: true}) as Node[];
+    const items: HTMLElement[] = [];
+    for (const node of assigned) {
+      if (!(node instanceof HTMLElement)) continue;
+      // If the assigned node itself is a dropdown item, include it.
+      if (node.tagName === "PGGM-DROPDOWN-ITEM") {
+        items.push(node as HTMLElement);
+        continue;
+      }
+      // Otherwise, include only immediate child dropdown items (not deep descendants)
+      // This prevents submenu items nested deeper (e.g. inside a submenu slot) from
+      // being treated as top-level menu items.
+      try {
+        const directChildren = Array.from(
+          (node as Element).querySelectorAll?.(':scope > pggm-dropdown-item') || [],
+        ) as HTMLElement[];
+        for (const child of directChildren) items.push(child);
+      } catch {
+        // If :scope isn't supported, fall back to shallow child iteration
+        const fallback = Array.from((node as Element).children || []).filter(
+          (c) => (c as HTMLElement).tagName === "PGGM-DROPDOWN-ITEM",
+        ) as HTMLElement[];
+        for (const child of fallback) items.push(child);
+      }
+    }
+
+    return items.filter((el) => !el.hasAttribute("disabled"));
   }
 
   /**

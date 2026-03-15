@@ -168,6 +168,12 @@ export class FocusGroupController<
     const elements = this.#cachedElements;
     const currentIndex = elements.indexOf(this.#currentFocused);
     const previous = elements[currentIndex - nr];
+    if (!previous) {
+      if (this.options.direction !== "both") {
+        this.#focusLast();
+      }
+      return;
+    }
 
     if (!this.options.isFocusableElement(previous) && this.options.direction === "both") {
       return;
@@ -191,6 +197,12 @@ export class FocusGroupController<
     const elements = this.#cachedElements;
     const currentIndex = elements.indexOf(this.#currentFocused);
     const next = elements[currentIndex + nr];
+    if (!next) {
+      if (this.options.direction !== "both") {
+        this.#focusFirst(options);
+      }
+      return;
+    }
 
     if (!this.options.isFocusableElement(next) && this.options.direction === "both") {
       return;
