@@ -52,12 +52,11 @@
     <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" type="module"></script>
     <script src="../dist/p-component.js" defer></script>
     <script>
-    document.querySelectorAll('pggm-dropdown-item')?.forEach((element) => {
-      element.addEventListener('click', (event) => {
-        
-        console.log(event.target);
-      });
+    
+    document.querySelector('pggm-dropdown').addEventListener('dropdownSelect', (event) => {
+      console.log(event.detail.item.textContent);
     });
+    
     </script>
   </body>
 </html>

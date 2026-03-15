@@ -13,6 +13,7 @@ import css from "./dropdown-item.css";
  * @attr {string} value - Value associated with the item
  *
  * @fires itemSelect - Dispatched when the item is selected
+ * @fires itemSelect - Dispatched when the item is selected
  *
  * @slot - Default slot for item label
  * @slot icon - Slot for icon at the start of the item

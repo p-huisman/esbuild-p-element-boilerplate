@@ -83,6 +83,7 @@ export class DropdownElement extends CustomElement {
 
   /** Reference to the menu's default slot for slotchange handling */
   private menuSlot?: HTMLSlotElement | null;
+  private menuSlotHandler?: (e?: Event) => void;
 
   /** Handler for outside clicks */
   private outsideClickHandler?: (event: Event) => void;
@@ -167,49 +168,23 @@ export class DropdownElement extends CustomElement {
 
     // Capture a stable reference to the menu element before PopupController
     // may move or remove it from the shadow DOM so we can re-open later.
-    try {
-      this.menuRef =
-        this.menuElement ||
-        (this.shadowRoot?.querySelector("#menu") as HTMLDivElement) ||
-        null;
-    } catch {
-      this.menuRef = null;
-    }
+    this.menuRef = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLDivElement) || null;
 
     // Watch for slot changes inside the menu so the focus controller can
     // refresh its element list when slotted content changes.
-    try {
-      this.menuSlot = (this.menuRef?.querySelector("slot") as HTMLSlotElement) || null;
-      if (this.menuSlot) {
-        this.menuSlot.addEventListener("slotchange", () => {
-          try {
-            this.#focusGroupController.updateElements();
-          } catch (err) {
-            try { if ((globalThis as any).__PGGM_DEBUG__) console.error('menu slotchange handler failed', err); } catch {}
-          }
-        });
-      }
-    } catch (err) {
-      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('menuSlot setup failed', err); } catch {}
-      this.menuSlot = null;
+    this.menuSlot = (this.menuRef?.querySelector("slot") as HTMLSlotElement) || null;
+    if (this.menuSlot) {
+      this.menuSlotHandler = () => this.#focusGroupController.updateElements();
+      this.menuSlot.addEventListener("slotchange", this.menuSlotHandler as EventListener);
     }
 
     // Initialize ARIA attributes on the trigger based on current state
-    try {
-      this.updateTriggerA11y(false);
-    } catch (err) {
-      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('updateTriggerA11y failed', err); } catch {}
-    }
+    this.updateTriggerA11y(false);
 
     // Watch for changes to the trigger slot so we can apply ARIA attributes
-    try {
-      this.triggerSlot = this.shadowRoot?.querySelector('slot[name="trigger"]') as HTMLSlotElement;
-      if (this.triggerSlot) {
-        this.triggerSlot.addEventListener('slotchange', this.handleTriggerSlotChange as any);
-      }
-    } catch (err) {
-      try { if ((globalThis as any).__PGGM_DEBUG__) console.error('triggerSlot setup failed', err); } catch {}
-      this.triggerSlot = null;
+    this.triggerSlot = this.shadowRoot?.querySelector('slot[name="trigger"]') as HTMLSlotElement;
+    if (this.triggerSlot) {
+      this.triggerSlot.addEventListener('slotchange', this.handleTriggerSlotChange as any);
     }
   }
 
@@ -222,16 +197,9 @@ export class DropdownElement extends CustomElement {
     document.removeEventListener("click", this.handleDocumentClick);
     this.removeEventListener("itemSelect" as any, this.handleItemSelect as any);
 
-    try {
-      if (this.triggerSlot) this.triggerSlot.removeEventListener('slotchange', this.handleTriggerSlotChange as any);
-    } catch {
-      /* ignore */
-    }
-
-    try {
-      if (this.menuSlot) this.menuSlot.removeEventListener('slotchange', () => this.#focusGroupController.updateElements());
-    } catch {
-      /* ignore */
+    if (this.triggerSlot) this.triggerSlot.removeEventListener('slotchange', this.handleTriggerSlotChange as any);
+    if (this.menuSlot && this.menuSlotHandler) {
+      this.menuSlot.removeEventListener('slotchange', this.menuSlotHandler as EventListener);
     }
 
     this.removeEventListener("keydown", this.handleTriggerKeyDown as any);
@@ -878,6 +846,14 @@ export class DropdownElement extends CustomElement {
    */
   @Bind
   private handleItemSelect(event: CustomEvent): void {
+    // Prevent ancestor dropdowns from also handling this selection
+    try {
+      event.stopPropagation();
+    } catch {
+      /* ignore */
+    }
+
+    // Re-emit a single selection event for consumers (legacy `dropdownSelect`)
     this.dispatchEvent(
       new CustomEvent("dropdownSelect", {
         bubbles: true,
@@ -885,6 +861,7 @@ export class DropdownElement extends CustomElement {
         detail: event.detail,
       }),
     );
+
     this.open = false;
   }
 
