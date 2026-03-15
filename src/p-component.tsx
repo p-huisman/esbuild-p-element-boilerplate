@@ -1,5 +1,8 @@
 import css from "./p-component.css";
 
+import "./components/dropdown/dropdown";
+import "./components/dropdown/dropdown-item";
+
 @CustomElementConfig({
   tagName: "p-component",
 })

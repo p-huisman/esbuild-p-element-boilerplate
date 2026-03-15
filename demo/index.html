@@ -17,10 +17,47 @@
           <li><a href="https://www.joshwcomeau.com/css/interactive-guide-to-grid/">CSS Grid guide</a></li>
           <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries">CSS container queries</a></li>
         </ul>
+
+        <pggm-dropdown>
+          <button
+            slot="trigger">
+            Actions
+          </button>
+          <pggm-dropdown-item checked>
+           Edit
+           <span slot="details">Ctrl+S</span>
+          </pggm-dropdown-item>
+          <pggm-dropdown-item>Copy</pggm-dropdown-item>
+          <pggm-dropdown-item>Export 
+            <div slot="submenu">
+              <pggm-dropdown-item>Export as text</pggm-dropdown-item>
+              <pggm-dropdown-item>Export as archive</pggm-dropdown-item>
+            </div>
+          </pggm-dropdown-item>
+          <pggm-dropdown-item>Delete
+              <div slot="submenu">
+                <pggm-dropdown-item>Delete permanently</pggm-dropdown-item>
+                <pggm-dropdown-item>Move to trash
+                  <div slot="submenu">
+                    <pggm-dropdown-item>Empty trash</pggm-dropdown-item>
+                    <pggm-dropdown-item>Restore from trash
+                  </div>
+                </pggm-dropdown-item>
+              </div>
+          </pggm-dropdown-item>
+        </pggm-dropdown>
       </div>
       <div slot="footer">Peter Huisman</div>
     </p-component>
-    <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" defer></script>
+    <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" type="module"></script>
     <script src="../dist/p-component.js" defer></script>
+    <script>
+    document.querySelectorAll('pggm-dropdown-item')?.forEach((element) => {
+      element.addEventListener('click', (event) => {
+        
+        console.log(event.target);
+      });
+    });
+    </script>
   </body>
 </html>

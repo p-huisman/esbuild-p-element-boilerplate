@@ -1,0 +1,146 @@
+:host,
+* {
+  box-sizing: border-box;
+} 
+:host {
+  outline: none;
+}
+
+/* When this element is slotted into a submenu, force it to take full width */
+:host([slot="submenu"]) {
+  
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* When slotted into a submenu, style the internal container to fill width */
+:host([slot="submenu"]) .dropdown-item {
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  padding: var(--dropdown-item-padding, .375rem 1rem);
+}
+
+:host(:focus-visible) .dropdown-item {
+  outline: 2px solid var(--dropdown-item-focus-outline, #3b82f6);
+  outline-offset: -2px;
+  border-radius: var(--dropdown-item-border-radius, 4px);
+}
+::slotted(pggm-dropdown-item) {
+  font-size: inherit;
+}
+#submenu {
+  display: none;
+}
+#submenu:popover-open {
+  display: flex;
+  min-width: 180px;
+  /* allow submenu to size to available space; don't force max-content */
+  width: auto;
+  background-color: var(--dropdown-background, #fff);
+}
+
+.dropdown-item{
+  margin: 0;
+  flex: 1;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--dropdown-item-padding, .375rem 1rem);
+  border-radius: var(--dropdown-item-border-radius, 4px);
+  color: var(--dropdown-item-color, #000);
+  cursor: pointer;
+  transition:
+    100ms background-color ease,
+    100ms color ease;
+  background-color: var(--dropdown-item-background, #fff);
+  
+}
+.dropdown-item:hover{
+  background-color: var(--dropdown-item-hover-background, #f0f0f0);
+}
+.dropdown-item:active {
+  background-color: var(--dropdown-item-active-background, #e0e0e0);
+} 
+
+.disabled {
+  color: var(--dropdown-item-color-disabled, #999);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  margin-inline-end: 0.5rem;
+}
+.icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.details {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: end;
+  margin-inline-start: 1rem;
+  opacity: 0.7;
+  font-size: 0.875em;
+}
+.submenuIndicator {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  font-size: 1.25em;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+}
+.submenu {
+  /* align-items: stretch; */
+  justify-content: flex-start;
+  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  /* min-width: 180px; */
+  width: auto;
+  margin: 0;
+  /* padding: var(--dropdown-padding, .5rem 0); */
+  border: 1px solid var(--dropdown-border-color, #ccc);
+  border-radius: var(--dropdown-border-radius, 4px);
+  background-color: var(--dropdown-background, #fff);
+  box-shadow: var(--dropdown-box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+  color: var(--dropdown-color, #000 );
+  text-align: start;
+  user-select: none;
+}
+
+/* Ensure slotted submenu items fill the submenu and are left-aligned */
+::slotted(pggm-dropdown-item) {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Note: cannot target inside slotted element from host; use :host([slot]) rules above */
+
+/* Force reasonable padding and remove extra vertical spacing inside submenu */
+::slotted(pggm-dropdown-item) {
+  --dropdown-item-padding: .375rem 1rem;
+}
+
+.submenu {
+  padding: 0.25rem 0;
+}

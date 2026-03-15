@@ -12,22 +12,20 @@
     "develop": "p-build --action develop",
     "test": "p-build --action test",
     "testdevelop": "p-build --action testdevelop",
-    "lint": "eslint --fix --ext ts --ext tsx ./src",
-    "prepare": "husky"
+    "lint": "eslint --fix --ext ts --ext tsx ./src"
   },
   "keywords": [],
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@pggm/p-build": "^0.1.12",
-    "@types/animejs": "^3.1.12",
-    "@types/jasmine": "^5.1.4",
-    "@types/underscore": "^1.11.15",
-    "fetch-mock": "^9.11.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
-    "p-elements-core": "1.2.5",
-    "typescript": "^5.4.5"
+    "@types/animejs": "^3.1.13",
+    "@types/jasmine": "^5.1.7",
+    "@types/underscore": "^1.13.0",
+    "fetch-mock": "^12.5.2",
+    "lint-staged": "^15.5.1",
+    "p-element-build": "^1.0.4-rc2",
+    "p-elements-core": "1.2.32-rc6",
+    "typescript": "^5.8.3"
   },
   "browserslist": [
     "> 2% in NL",

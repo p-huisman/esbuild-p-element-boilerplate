@@ -1,0 +1,41 @@
+:host{
+  box-sizing: border-box;  
+  
+}
+/*   
+.base {
+  display: contents;
+} */
+
+.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Hidden by default; only shown when dropdown is opened or the
+     popover element has an `open` state. Hiding prevents the menu from
+     appearing at `left:0 top:0` on startup. */
+  display: none;
+  flex-direction: column;
+  min-width: var(--dropdown-min-width, 120px);
+  margin: 0;
+  border: 1px solid var(--dropdown-border-color, #ccc);
+  border-radius: var(--dropdown-border-radius, 4px);
+  background-color: var(--dropdown-background, #fff);
+  box-shadow: var(--dropdown-box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+  color: var(--dropdown-color);
+  text-align: start;
+  user-select: none;
+  z-index: var(--dropdown-z-index, 1000);
+  padding: var(--dropdown-padding, 0);
+}
+
+/* Show menu when host's `open` attribute is true */
+:host([open]) .menu {
+  display: block;
+}
+
+/* Also show when the menu element itself is opened via the Popover API */
+.menu[open],
+.menu:popover-open {
+  display: block;
+}
