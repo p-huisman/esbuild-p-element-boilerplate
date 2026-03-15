@@ -78,6 +78,9 @@ export class DropdownElement extends CustomElement {
   @Query("[popover]")
   private readonly popoverElement?: HTMLElement;
 
+  /** Reference to the trigger slot element for slotchange handling */
+  private triggerSlot?: HTMLSlotElement | null;
+
   /** Handler for outside clicks */
   private outsideClickHandler?: (event: Event) => void;
 
@@ -169,6 +172,23 @@ export class DropdownElement extends CustomElement {
     } catch {
       this.menuRef = null;
     }
+
+    // Initialize ARIA attributes on the trigger based on current state
+    try {
+      this.updateTriggerA11y(false);
+    } catch {
+      /* ignore */
+    }
+
+    // Watch for changes to the trigger slot so we can apply ARIA attributes
+    try {
+      this.triggerSlot = this.shadowRoot?.querySelector('slot[name="trigger"]') as HTMLSlotElement;
+      if (this.triggerSlot) {
+        this.triggerSlot.addEventListener('slotchange', this.handleTriggerSlotChange as any);
+      }
+    } catch {
+      this.triggerSlot = null;
+    }
   }
 
   /**
@@ -179,6 +199,12 @@ export class DropdownElement extends CustomElement {
     super.disconnectedCallback();
     document.removeEventListener("click", this.handleDocumentClick);
     this.removeEventListener("itemSelect" as any, this.handleItemSelect as any);
+
+    try {
+      if (this.triggerSlot) this.triggerSlot.removeEventListener('slotchange', this.handleTriggerSlotChange as any);
+    } catch {
+      /* ignore */
+    }
 
     this.removeEventListener("keydown", this.handleTriggerKeyDown as any);
 
@@ -489,16 +515,35 @@ export class DropdownElement extends CustomElement {
    * that value; otherwise it uses the current `this.open`.
    */
   private updateTriggerA11y(openState?: boolean): void {
-    const trigger = this.getTrigger();
+    // Prefer the assigned trigger from the slot, but fall back to searching
+    // the host's light DOM for an element with `slot="trigger"` so we
+    // handle environments without a shadowRoot or timing issues where the
+    // slot isn't yet available.
+    let trigger = this.getTrigger();
+    if (!trigger) {
+      try {
+        trigger = (this.querySelector('[slot="trigger"]') as HTMLElement) || null;
+      } catch {
+        trigger = null;
+      }
+    }
     if (!trigger) return;
     try {
-      trigger.setAttribute("aria-haspopup", "menu");
+      // Do not overwrite user-provided attributes. Set aria-haspopup and
+      // aria-controls only when they are not already present on the trigger.
+      if (!trigger.hasAttribute("aria-haspopup")) {
+        trigger.setAttribute("aria-haspopup", "menu");
+      }
       const expanded = typeof openState === "boolean" ? openState : !!this.open;
+      // aria-expanded should reflect component state; keep it in sync.
       trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      // Attempt to set aria-controls to the menu id so assistive tech can relate them.
-      const menuEl = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLElement) || null;
-      if (menuEl && menuEl.id) {
-        trigger.setAttribute("aria-controls", menuEl.id);
+      // Set aria-controls only when not provided by the consumer and we can
+      // determine an id for the menu.
+      if (!trigger.hasAttribute("aria-controls")) {
+        const menuEl = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLElement) || null;
+        if (menuEl && menuEl.id) {
+          trigger.setAttribute("aria-controls", menuEl.id);
+        }
       }
     } catch {
       /* ignore */
@@ -687,6 +732,15 @@ export class DropdownElement extends CustomElement {
     if (event.key === "Escape") {
       this.open = false;
       event.stopPropagation();
+    }
+  }
+
+  @Bind
+  private handleTriggerSlotChange(): void {
+    try {
+      this.updateTriggerA11y(false);
+    } catch {
+      /* ignore */
     }
   }
 
