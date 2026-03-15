@@ -358,6 +358,17 @@ export class DropdownElement extends CustomElement {
     // Use PopupController to open the menu (handles Popover API differences)
     this.popupController?.open(popupToOpen, trigger);
 
+    // Ensure PopupController has a chance to reposition after any DOM moves it performs
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          this.popupController?.positionPopup();
+        } catch {
+          /* ignore */
+        }
+      });
+    });
+
     // Update ARIA on trigger and popup
     try {
       this.updateTriggerA11y(true);
@@ -540,24 +551,44 @@ export class DropdownElement extends CustomElement {
     const menu = this.menuElement;
     const triggerRect = trigger.getBoundingClientRect();
 
-    // Temporarily show menu to measure dimensions if hidden
-    const prevDisplay = menu.style.display;
-    if (getComputedStyle(menu).display === "none") {
-      menu.style.display = "block";
+    // Measure without causing reflow by keeping the element visually hidden
+    // and moved off-screen via transform. This avoids changing `display` which
+    // can trigger layout thrash.
+    const prevVisibility = menu.style.visibility;
+    const prevTransform = menu.style.transform;
+    const prevPointerEvents = menu.style.pointerEvents;
+    try {
+      menu.style.visibility = "hidden";
+      menu.style.pointerEvents = "none";
+      menu.style.transform = "translate3d(-9999px,-9999px,0)";
+      const menuHeight = menu.offsetHeight;
+      const menuWidth = menu.offsetWidth;
+
+      const x = this.calculateMenuX(triggerRect, menuWidth);
+      const y = this.calculateMenuY(triggerRect, menuHeight);
+
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+        maxWidth: `${globalThis.innerWidth - x - 16}px`,
+        maxHeight: `${globalThis.innerHeight - y - 16}px`,
+        transform: prevTransform || "",
+        visibility: prevVisibility || "",
+        pointerEvents: prevPointerEvents || "",
+      });
+    } finally {
+      // Ensure we restore values if an error occurred measuring
+      try {
+        menu.style.transform = prevTransform || "";
+        menu.style.visibility = prevVisibility || "";
+        menu.style.pointerEvents = prevPointerEvents || "";
+      } catch {
+        /* ignore */
+      }
+      // Recompute measured sizes in case they are needed elsewhere
+      const menuHeight = menu.offsetHeight;
+      const menuWidth = menu.offsetWidth;
     }
-    const menuHeight = menu.offsetHeight;
-    const menuWidth = menu.offsetWidth;
-    if (prevDisplay) menu.style.display = prevDisplay;
-
-    const x = this.calculateMenuX(triggerRect, menuWidth);
-    const y = this.calculateMenuY(triggerRect, menuHeight);
-
-    Object.assign(menu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-      maxWidth: `${globalThis.innerWidth - x - 16}px`,
-      maxHeight: `${globalThis.innerHeight - y - 16}px`,
-    });
   }
 
   /**

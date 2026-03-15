@@ -302,7 +302,33 @@ export class DropdownItemElement extends CustomElement {
           this.submenuElement.style.left = `${rect.right}px`;
         }
 
-        this.submenuElement.style.top = `${rect.top}px`;
+        // Compute clamped position so submenu stays within the viewport
+        const submenuHeight = this.submenuElement.offsetHeight;
+        let left: number;
+        if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
+          left = rect.left - submenuWidth;
+        } else {
+          left = rect.right;
+        }
+
+        // Vertical: prefer aligning top with the parent item, but clamp
+        // so the submenu does not extend off the viewport.
+        let top = rect.top;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Clamp left within viewport with 8px margin
+        left = Math.min(Math.max(8, left), Math.max(8, viewportWidth - submenuWidth - 8));
+
+        // Clamp top within viewport with 8px margin
+        if (top + submenuHeight + 8 > viewportHeight) {
+          // try to shift upwards so submenu fits
+          top = Math.max(8, viewportHeight - submenuHeight - 8);
+        }
+        top = Math.max(8, top);
+
+        this.submenuElement.style.left = `${left}px`;
+        this.submenuElement.style.top = `${top}px`;
 
         // Focus first item when opening the submenu
         if (focusFirst) {
