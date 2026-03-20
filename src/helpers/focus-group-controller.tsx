@@ -1,13 +1,3 @@
-/**
- * FocusGroupController manages keyboard focus within a set of related
- * focusable elements (e.g. menu items). It provides Home/End/Arrow
- * navigation and ensures tabindex management for accessibility.
- *
- * When navigation keys are handled, the controller stops propagation so
- * nested focus groups (such as submenus) don't allow ancestor groups to also
- * handle the same navigation events — this keeps navigation scoped to the
- * active group.
- */
 export class FocusGroupController<
   T extends HTMLElement,
 > extends CustomElementController {
@@ -15,10 +5,11 @@ export class FocusGroupController<
     hostElement: CustomElement,
     private options: {
       direction: "horizontal" | "vertical" | "both";
+      disableTabIndexManagement?: boolean;
       elements: () => T[];
       isFocusableElement: (el: T) => boolean;
       directionLength?: number;
-    }
+    },
   ) {
     super(hostElement);
     if (this.options.directionLength) {
@@ -48,17 +39,21 @@ export class FocusGroupController<
     }
     elements.forEach((element) => {
       element.dataset.focusGroup = true.toString();
-      element.tabIndex = -1;
+      if (!this.options.disableTabIndexManagement) {
+        element.tabIndex = -1;
+      }
     });
 
     const allFocusable = elements.filter((el) =>
-      this.options.isFocusableElement(el)
+      this.options.isFocusableElement(el),
     );
 
     if (!this.#currentFocused) {
       this.#currentFocused = allFocusable[0]; //elements[0];
     }
-    this.#currentFocused.tabIndex = 0;
+    if (this.#currentFocused && !this.options.disableTabIndexManagement) {
+      this.#currentFocused.tabIndex = 0;
+    }
   }
 
   #addEventHandlers(elements: T[]): void {
@@ -84,18 +79,31 @@ export class FocusGroupController<
   }
 
   #onFocus = (event: FocusEvent): void => {
-    const target = event.target as T;
-    this.#cachedElements.forEach((element) => {
-      if (element !== target) {
-        element.tabIndex = -1;
-      } else {
-        element.tabIndex = 0;
-      }
-    });
+    if (!this.options.disableTabIndexManagement) {
+      const target = event.target as T;
+      this.#cachedElements.forEach((element) => {
+        if (element !== target) {
+          element.tabIndex = -1;
+        } else {
+          element.tabIndex = 0;
+        }
+      });
+    }
   };
 
   #onKeyDown = (event: KeyboardEvent): void => {
-    // console.debug("FocusGroupController: keydown", event.key);
+    // Ignore bubbled key events: only handle when the listener's element
+    // is the current active/focused element. This prevents ancestor
+    // focus controllers from responding to key events originating in
+    // nested submenus.
+    const listenerElement = event.currentTarget as T | null;
+    const targetNode = event.target as Node | null;
+    if (listenerElement) {
+      const originatedInside = targetNode && listenerElement.contains(targetNode);
+      if (!originatedInside && document && document.activeElement !== listenerElement && this.#currentFocused !== listenerElement) {
+        return;
+      }
+    }
     const keys = ["End", "Home"];
     if (this.options.direction === "both") {
       keys.push("ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown");
@@ -106,16 +114,18 @@ export class FocusGroupController<
     }
     if (keys.includes(event.key)) {
       event.preventDefault();
-      // Prevent ancestor focus groups from also handling these navigation
-      // keys so nested menus navigate independently.
-      event.stopPropagation();
+      try {
+        event.stopPropagation();
+      } catch {
+        /* ignore */
+      }
       if (event.key === "End") {
         this.#focusLast();
       } else if (event.key === "Home") {
         this.#focusFirst();
       } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
         let nrOfItems = 1;
-        if ( event.key === "ArrowUp") {
+        if (event.key === "ArrowUp") {
           nrOfItems = this.#directionLength;
         }
         this.#focusPrevious(nrOfItems);
@@ -129,7 +139,7 @@ export class FocusGroupController<
     }
   };
 
-  focusElement(element?: T, focusOptions?: FocusOptions ): void {
+  focusElement(element?: T, focusOptions?: FocusOptions): void {
     if (!element) {
       this.#focusFirst();
       return;
@@ -138,12 +148,10 @@ export class FocusGroupController<
     element.focus(focusOptions);
   }
 
-
-
   #focusFirst(options?: FocusOptions): void {
     const elements = this.#cachedElements;
     const focusable = elements.filter((el) =>
-      this.options.isFocusableElement(el)
+      this.options.isFocusableElement(el),
     );
     const first = focusable[0];
     if (first) {
@@ -155,7 +163,7 @@ export class FocusGroupController<
   #focusLast(options?: FocusOptions): void {
     const elements = this.#cachedElements;
     const focusable = elements.filter((el) =>
-      this.options.isFocusableElement(el)
+      this.options.isFocusableElement(el),
     );
     const last = focusable[focusable.length - 1];
     if (last) {
@@ -175,21 +183,20 @@ export class FocusGroupController<
       return;
     }
 
-    if (!this.options.isFocusableElement(previous) && this.options.direction === "both") {
+    if (
+      !this.options.isFocusableElement(previous) &&
+      this.options.direction === "both"
+    ) {
       return;
     }
 
-    if (previous) {
-      this.#currentFocused = previous;
-      if (!this.options.isFocusableElement(previous)) {
-        if (this.options.direction !== "both") {
-          this.#focusPrevious(1);
-        }
-      } else {
-        previous.focus(options);
+    this.#currentFocused = previous;
+    if (!this.options.isFocusableElement(previous)) {
+      if (this.options.direction !== "both") {
+        this.#focusPrevious(1);
       }
-    } else if (this.options.direction !== "both"){
-      this.#focusLast();
+    } else {
+      previous.focus(options);
     }
   }
 
@@ -204,21 +211,20 @@ export class FocusGroupController<
       return;
     }
 
-    if (!this.options.isFocusableElement(next) && this.options.direction === "both") {
+    if (
+      !this.options.isFocusableElement(next) &&
+      this.options.direction === "both"
+    ) {
       return;
     }
 
-    if (next) {
-      this.#currentFocused = next;
-      if (!this.options.isFocusableElement(next)) {
-        if (this.options.direction !== "both") {
-          this.#focusNext(1, options);
-        }
-      } else {
-        next.focus(options);
+    this.#currentFocused = next;
+    if (!this.options.isFocusableElement(next)) {
+      if (this.options.direction !== "both") {
+        this.#focusNext(1, options);
       }
-    } else if (this.options.direction !== "both") {
-      this.#focusFirst(options);
+    } else {
+      next.focus(options);
     }
   }
 

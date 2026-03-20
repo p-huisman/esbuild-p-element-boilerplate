@@ -24,7 +24,7 @@ export type PopupControllerOptions = {
  * Generic popup controller that provides Popover-API-first behavior and
  * basic positioning, outside-click handling, Escape handling and
  * reposition-on-resize/scroll. Designed to be reused by multiple
- * components (date-input, dropdown, etc.).
+ * components (dropdown, etc.).
  */
 export class PopupController {
   readonly #host: CustomElement;
@@ -61,6 +61,42 @@ export class PopupController {
         }
       });
     });
+  }
+
+  private setPopupPid(popup: HTMLElement): string {
+    const pid = `pggm-popup-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    if (popup && typeof (popup as any).dataset === "object") {
+      (popup as any).dataset.pggmPopupId = pid;
+    }
+    return pid;
+  }
+
+  private attachPopupToContainer(popup: HTMLElement): HTMLElement | Document {
+    const container = (this.#host as any).shadowRoot || document.body;
+    const popupRoot = (popup as any).getRootNode ? (popup as any).getRootNode() : popup.parentNode;
+    const wasAlreadyInContainer = popupRoot === container || popup.parentNode === container;
+    if (wasAlreadyInContainer) {
+      this.#popupWasAppended = false;
+    } else {
+      container.appendChild(popup);
+      this.#popupWasAppended = true;
+    }
+    return container;
+  }
+
+  private resetPopoverState(popup: HTMLElement) {
+    if (popup && typeof popup.removeAttribute === "function") {
+      popup.removeAttribute("popover");
+    }
+    if (popup && typeof popup.setAttribute === "function") {
+      popup.setAttribute("popover", "");
+    }
+  }
+
+  private applyInlineDefaults(el: HTMLElement) {
+    el.style.position = "fixed";
+    el.style.margin = "0";
+    el.style.zIndex = "1000";
   }
 
   private applyPopupPosition(realEl: HTMLElement) {
@@ -119,47 +155,12 @@ export class PopupController {
     this.#popup = popup;
     this.#anchor = anchor ?? null;
 
-    // Give the popup a stable id so we can find it even if the UA wraps
-    // or replaces the node during `showPopover()`.
-    const pid = `pggm-popup-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    if (this.#popup && typeof (this.#popup as any).dataset === "object") {
-      (this.#popup as any).dataset.pggmPopupId = pid;
-    }
+    const pid = this.setPopupPid(this.#popup);
+    const container = this.attachPopupToContainer(this.#popup);
+    this.resetPopoverState(this.#popup);
 
-    // Check if popup is already in the host's container (part of template).
-    // Use getRootNode() when available to correctly detect ShadowRoot owners
-    // (parentNode may be null for nodes inside a shadow DOM
-    // `DocumentFragment`). Falling back to parentNode equality for older UAs.
-    const container = (this.#host as any).shadowRoot || document.body;
-    let wasAlreadyInContainer = false;
-    const popupRoot = (this.#popup as any).getRootNode
-      ? (this.#popup as any).getRootNode()
-      : this.#popup.parentNode;
-    wasAlreadyInContainer = popupRoot === container || this.#popup.parentNode === container;
-
-    // Attach to the host's shadow root so the popup stays scoped to the
-    // component. Fall back to `document.body` only when the host has no
-    // shadowRoot (rare in our components).
-    if (wasAlreadyInContainer) {
-      this.#popupWasAppended = false;
-    } else {
-      container.appendChild(this.#popup);
-      this.#popupWasAppended = true;
-    }
-
-    // Reset popover state - remove and re-add the attribute to clear any stale state
-    if (this.#popup && typeof this.#popup.removeAttribute === "function") {
-      this.#popup.removeAttribute("popover");
-    }
-    if (this.#popup && typeof this.#popup.setAttribute === "function") {
-      this.#popup.setAttribute("popover", "");
-    }
-
-    // basic inline style defaults
     const el = this.#popup;
-    el.style.position = "fixed";
-    el.style.margin = "0";
-    el.style.zIndex = "1000";
+    this.applyInlineDefaults(el);
 
     // Inform optional hook before showing
     this.#options.onAttach?.(el);
@@ -266,10 +267,10 @@ export class PopupController {
       if (this.#options.insideSelector) {
         const found = nodes.some((n) => {
           if (!(n instanceof Element)) return false;
-          const closest = (n as Element).closest;
+          const closest = n.closest;
           if (typeof closest !== "function") return false;
           try {
-            return Boolean((n as Element).closest(this.#options.insideSelector!));
+            return Boolean(n.closest(this.#options.insideSelector));
           } catch {
             return false;
           }
@@ -292,10 +293,10 @@ export class PopupController {
         // the event before other handlers. Add touchstart as a fallback for
         // environments without pointer events.
         if (typeof document?.addEventListener === "function") {
-          document.addEventListener("pointerdown", this.#outsideHandler!, true);
+          document.addEventListener("pointerdown", this.#outsideHandler, true);
           document.addEventListener(
             "touchstart",
-            this.#outsideHandler!,
+            this.#outsideHandler,
             {passive: true, capture: true} as AddEventListenerOptions,
           );
         }
@@ -313,7 +314,7 @@ export class PopupController {
   positionPopup() {
     if (!this.#popup) return;
     const anchorEl =
-      (this.#anchor as HTMLElement) || (this.#host as any as HTMLElement);
+      this.#anchor || (this.#host as any as HTMLElement);
     const hostRect = anchorEl.getBoundingClientRect();
     const popup = this.#popup;
     popup.style.position = "fixed";
