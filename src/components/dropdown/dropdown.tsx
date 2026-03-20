@@ -1,6 +1,8 @@
-import {FocusGroupController} from "../../helpers/focus-group-controller";
-import {PopupController} from "../../helpers/popup-controller";
+import {FocusGroupController} from "@pggm/helpers/src/focus-group-controller";
+import {PopupController} from "@pggm/helpers/src/popup-controller";
 import css from "./dropdown.css";
+
+export {DropdownItemElement} from "./dropdown-item";
 
 /**
  * Dropdown component that displays a menu of options when triggered.
@@ -27,7 +29,7 @@ export class DropdownElement extends CustomElement {
   /** The custom element tag name */
   static readonly TAG_NAME = "pggm-dropdown";
 
-  
+
   static readonly style =  css;
 
   /** Counter for auto-generated menu ids */
@@ -49,25 +51,25 @@ export class DropdownElement extends CustomElement {
    * Whether the dropdown is currently open.
    * @type {boolean}
    */
-  @Property({type: Boolean, reflect: true})
+  @Property({type: "boolean", reflect: true})
   open = false;
 
   /**
    * The distance of the dropdown menu from its trigger.
    * @type {number}
    */
-  @Property({type: Number})
+  @Property({type: "number"})
   distance = 0;
 
   /**
    * The offset of the dropdown menu along its trigger.
    * @type {number}
    */
-  @Property({type: Number})
+  @Property({type: "number"})
   offset = 0;
 
   /** Horizontal alignment preference for the popup: auto|left|right|center */
-  @Property({type: String, reflect: true})
+  @Property({type: "string", reflect: true})
   align: "auto" | "left" | "right" | "center" = "auto";
 
   /** Reference to the menu element */
@@ -163,7 +165,7 @@ export class DropdownElement extends CustomElement {
 
     // Capture a stable reference to the menu element before PopupController
     // may move or remove it from the shadow DOM so we can re-open later.
-    this.menuRef = this.menuElement || (this.shadowRoot?.querySelector("#menu") as HTMLDivElement) || null;
+    this.menuRef = this.menuElement || this.shadowRoot?.querySelector("#menu") || null;
 
     // Ensure the menu has a stable, unique id so aria-controls can be set
     // reliably. Do not overwrite a consumer-provided id, but replace the
@@ -178,7 +180,7 @@ export class DropdownElement extends CustomElement {
 
     // Watch for slot changes inside the menu so the focus controller can
     // refresh its element list when slotted content changes.
-    this.menuSlot = (this.menuRef?.querySelector("slot") as HTMLSlotElement) || null;
+    this.menuSlot = this.menuRef?.querySelector<HTMLSlotElement>("slot") || null;
     if (this.menuSlot) {
       this.menuSlotHandler = () => this.#focusGroupController.updateElements();
       this.menuSlot.addEventListener("slotchange", this.menuSlotHandler as EventListener);
@@ -188,7 +190,7 @@ export class DropdownElement extends CustomElement {
     this.updateTriggerA11y(false);
 
     // Watch for changes to the trigger slot so we can apply ARIA attributes
-    this.triggerSlot = this.shadowRoot?.querySelector('slot[name="trigger"]') as HTMLSlotElement;
+    this.triggerSlot = this.shadowRoot?.querySelector<HTMLSlotElement>('slot[name="trigger"]');
     if (this.triggerSlot) {
       this.triggerSlot.addEventListener('slotchange', this.handleTriggerSlotChange as any);
     }
@@ -224,6 +226,18 @@ export class DropdownElement extends CustomElement {
         this.setupOpen();
       } else {
         this.setupClosed();
+        // Only dispatch close events when the dropdown actually transitioned
+        // from open (true) to closed (false). This avoids firing a close
+        // event during initial component setup where `oldValue` may be
+        // `undefined`.
+        if (oldValue === true) {
+          this.dispatchEvent(
+            new CustomEvent("dropdownClose", {
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        }
       }
     }
 
@@ -310,7 +324,7 @@ export class DropdownElement extends CustomElement {
     const popupToOpen =
       this.popoverElement ||
       this.menuRef ||
-      (this.shadowRoot?.querySelector("#menu") as HTMLDivElement) ||
+      this.shadowRoot?.querySelector("#menu") ||
       null;
     if (!popupToOpen) return;
 
@@ -369,10 +383,10 @@ export class DropdownElement extends CustomElement {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (typeof document?.addEventListener === "function") {
-          document.addEventListener("pointerdown", this.outsideClickHandler!, true);
+          document.addEventListener("pointerdown", this.outsideClickHandler, true);
           document.addEventListener(
             "touchstart",
-            this.outsideClickHandler!,
+            this.outsideClickHandler,
             {passive: true, capture: true} as AddEventListenerOptions,
           );
         }
@@ -395,11 +409,11 @@ export class DropdownElement extends CustomElement {
 
     // Update ARIA on trigger and popup
     this.updateTriggerA11y(true);
-    (popupToOpen as HTMLElement).setAttribute("aria-hidden", "false");
+    popupToOpen.setAttribute("aria-hidden", "false");
 
     // small async read to stabilize layout (no-op)
     setTimeout(() => {
-      const el = popupToOpen as HTMLElement;
+      const el = popupToOpen;
       globalThis.getComputedStyle?.(el);
       el.getBoundingClientRect?.();
     }, 50);
@@ -477,6 +491,10 @@ export class DropdownElement extends CustomElement {
         this.updateTriggerA11y(false);
       });
     }
+    else {
+      // Ensure consumers still receive the close event even if no trigger
+      this.updateTriggerA11y(false);
+    }
   }
 
   /**
@@ -491,7 +509,7 @@ export class DropdownElement extends CustomElement {
     // slot isn't yet available.
     let trigger = this.getTrigger();
     if (!trigger && typeof this.querySelector === "function") {
-      trigger = (this.querySelector('[slot="trigger"]') as HTMLElement) || null;
+      trigger = this.querySelector<HTMLElement>('[slot="trigger"]') || null;
     }
     if (!trigger) return;
     // Do not overwrite user-provided attributes. Set aria-haspopup and
@@ -506,8 +524,8 @@ export class DropdownElement extends CustomElement {
     // Set aria-controls only when not provided by the consumer and we can
     // determine an id for the menu.
     if (!trigger.hasAttribute("aria-controls")) {
-      const menuEl = this.menuElement || this.menuRef || (this.shadowRoot?.querySelector("#menu") as HTMLElement) || null;
-      if (menuEl && menuEl.id && typeof trigger.setAttribute === "function") {
+      const menuEl = this.menuElement || this.menuRef || this.shadowRoot?.querySelector("#menu") || null;
+      if (menuEl?.id && typeof trigger.setAttribute === "function") {
         trigger.setAttribute("aria-controls", menuEl.id);
       }
     }
@@ -653,9 +671,9 @@ export class DropdownElement extends CustomElement {
    * Gets the trigger element from the trigger slot.
    */
   private getTrigger(): HTMLElement | null {
-    const triggerSlot = this.shadowRoot?.querySelector(
+    const triggerSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(
       'slot[name="trigger"]',
-    ) as HTMLSlotElement;
+    );
     if (!triggerSlot) return null;
 
     const assignedElements = triggerSlot.assignedElements();
@@ -801,16 +819,16 @@ export class DropdownElement extends CustomElement {
     // collect nested nodes (wrapper elements) and also query within those
     // nodes for nested `pggm-dropdown-item` elements to support wrapped
     // submenu content.
-    const slot = menu.querySelector("slot") as HTMLSlotElement;
+    const slot = menu.querySelector<HTMLSlotElement>("slot");
     if (!slot) return [];
 
-    const assigned = slot.assignedNodes({flatten: true}) as Node[];
+    const assigned = slot.assignedNodes({flatten: true});
     const items: HTMLElement[] = [];
     for (const node of assigned) {
       if (!(node instanceof HTMLElement)) continue;
       // If the assigned node itself is a dropdown item, include it.
       if (node.tagName === "PGGM-DROPDOWN-ITEM") {
-        items.push(node as HTMLElement);
+        items.push(node);
         continue;
       }
       // Otherwise, include only immediate child dropdown items (not deep descendants)
@@ -818,8 +836,8 @@ export class DropdownElement extends CustomElement {
       // being treated as top-level menu items.
       try {
         const directChildren = Array.from(
-          (node as Element).querySelectorAll?.(':scope > pggm-dropdown-item') || [],
-        ) as HTMLElement[];
+          (node as Element).querySelectorAll?.<HTMLElement>(':scope > pggm-dropdown-item') || [],
+        );
         for (const child of directChildren) items.push(child);
       } catch {
         // If :scope isn't supported, fall back to shallow child iteration

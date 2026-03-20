@@ -1,4 +1,4 @@
-import {FocusGroupController} from "../../helpers/focus-group-controller";
+import {FocusGroupController} from "@pggm/helpers/src/focus-group-controller";
 import css from "./dropdown-item.css";
 
 /**
@@ -13,7 +13,6 @@ import css from "./dropdown-item.css";
  * @attr {string} value - Value associated with the item
  *
  * @fires itemSelect - Dispatched when the item is selected
- * @fires itemSelect - Dispatched when the item is selected
  *
  * @slot - Default slot for item label
  * @slot icon - Slot for icon at the start of the item
@@ -24,72 +23,46 @@ import css from "./dropdown-item.css";
   tagName: "pggm-dropdown-item",
 })
 export class DropdownItemElement extends CustomElement {
-  /** The custom element tag name */
   static readonly TAG_NAME = "pggm-dropdown-item";
-
-  /** List of attributes to observe for changes */
   static readonly observedAttributes = ["disabled", "checked", "value"];
 
-  
   static readonly style = css;
 
-  /**
-   * Whether the dropdown item is disabled.
-   * @type {boolean}
-   */
-  @Property({type: Boolean, reflect: true})
+  @Property({type: "boolean", reflect: true})
   disabled = false;
 
-  /**
-   * Whether the dropdown item is checked (shows checkmark).
-   * @type {boolean}
-   */
-  @Property({type: Boolean, reflect: true})
+  @Property({type: "boolean", reflect: true})
   checked = false;
 
-  /**
-   * The value associated with the dropdown item.
-   * @type {string}
-   */
-  @Property({type: String})
+  @Property({type: "string"})
   value = "";
 
-  /** Reference to the submenu popover element */
   @Query("#submenu")
   private readonly submenuElement?: HTMLElement;
 
-  /** Reference to the submenu slot */
   @Query('slot[name="submenu"]')
   private readonly submenuSlot?: HTMLSlotElement;
 
-  /** Track if submenu has content */
-  @Property({type: Boolean})
+  @Property({type: "boolean"})
   private hasSubmenu = false;
 
-  /** Track if submenu is currently open */
   private isSubmenuOpen = false;
 
-  /** Focus group controller for submenu keyboard navigation */
   readonly #submenuFocusController = new FocusGroupController<HTMLElement>(
     this,
     {
       direction: "vertical",
-      // Collect submenu items from the assigned slot nodes. We accept direct
-      // `pggm-dropdown-item` children as well as nested ones inside wrapper
-      // elements (e.g. a `div` used as a container), since the demo uses a
-      // wrapper for the submenu content.
       elements: () => {
         if (!this.submenuSlot) return [];
-        const assigned = this.submenuSlot.assignedNodes({flatten: true}) as Node[];
+        const assigned = this.submenuSlot.assignedNodes({flatten: true});
         const items: HTMLElement[] = [];
         for (const node of assigned) {
           if (node instanceof HTMLElement) {
             if (node.tagName === "PGGM-DROPDOWN-ITEM") {
-              items.push(node as HTMLElement);
+              items.push(node);
             }
-            // Also include any nested pggm-dropdown-item elements inside wrapper nodes
             const nested = Array.from(node.querySelectorAll?.("pggm-dropdown-item") || []);
-            for (const n of nested) items.push(n as HTMLElement);
+            for (const n of nested) items.push(n);
           }
         }
         return items.filter((el) => !el.hasAttribute("disabled"));
@@ -98,10 +71,6 @@ export class DropdownItemElement extends CustomElement {
     },
   );
 
-  /**
-   * Lifecycle callback invoked when the element is added to the DOM.
-   * Sets up event listeners and accessibility attributes.
-   */
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute("role", "menuitem");
@@ -115,52 +84,37 @@ export class DropdownItemElement extends CustomElement {
     this.addEventListener("keydown", this.handleKeyDown);
     this.addEventListener("mouseenter", this.handleMouseEnter);
     this.addEventListener("mouseleave", this.handleMouseLeave);
-    this.addEventListener("touchstart", this.handleTouchStart, {passive: true});
+    this.addEventListener("touchstart", this.handleTouchStart, {passive: true} as AddEventListenerOptions);
+    this.addEventListener("closeSubmenu" as any, this.handleCloseSubmenu as any);
     this.#submenuFocusController.connected();
 
-    // Check for submenu content after initial render
-    requestAnimationFrame(() => {
-      this.updateSubmenuState();
-    });
+    requestAnimationFrame(() => this.updateSubmenuState());
   }
 
-  /**
-   * Lifecycle callback invoked when the element is removed from the DOM.
-   * Cleans up event listeners.
-   */
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener("click", this.handleClick);
     this.removeEventListener("keydown", this.handleKeyDown);
     this.removeEventListener("mouseenter", this.handleMouseEnter);
     this.removeEventListener("mouseleave", this.handleMouseLeave);
-    this.removeEventListener("touchstart", this.handleTouchStart);
+    this.removeEventListener("touchstart", this.handleTouchStart as any);
+    this.removeEventListener("closeSubmenu" as any, this.handleCloseSubmenu as any);
     this.#submenuFocusController.disconnected();
   }
 
-  /**
-   * Handles click events on the dropdown item.
-   * On touch devices with submenus, first click opens submenu, not select.
-   * Dispatches select event if not disabled and no submenu or submenu already open.
-   */
   @Bind
   private handleClick(event: MouseEvent): void {
     if (this.disabled) return;
 
-    // If this item has a submenu
     if (this.hasSubmenuContent()) {
-      // Items with submenus should never dispatch itemSelect
-      // They only toggle the submenu visibility
       if (!this.isSubmenuOpen) {
         event.preventDefault();
         event.stopPropagation();
         this.showSubmenu();
       }
-      // If submenu already open, just ignore the click
       return;
     }
 
-    // No submenu, proceed with selection
     this.dispatchEvent(
       new CustomEvent("itemSelect", {
         bubbles: true,
@@ -170,33 +124,38 @@ export class DropdownItemElement extends CustomElement {
     );
   }
 
-  /**
-   * Handles touch start events to open submenu on touch devices.
-   */
   @Bind
   private handleTouchStart(): void {
     if (this.disabled || !this.hasSubmenuContent()) return;
-
-    // Show submenu on touch
     this.showSubmenu();
   }
 
-  /**
-   * Handles keyboard events on the dropdown item.
-   * Supports Enter and Space keys for selection or opening submenus, and Escape to close submenu.
-   */
   @Bind
   private handleKeyDown(event: KeyboardEvent): void {
     if (event.key === "Escape") {
-      // Close submenu if open
       if (this.isSubmenuOpen) {
         event.preventDefault();
         event.stopPropagation();
         this.hideSubmenu();
-        // Return focus to this item
         this.focus();
         return;
       }
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      if (this.hasSubmenuContent()) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.showSubmenu(true);
+        return;
+      }
+    }
+
+    if (event.key === "ArrowLeft") {
+      const closeEvt = new CustomEvent("closeSubmenu", {bubbles: true, composed: true});
+      this.dispatchEvent(closeEvt);
+      return;
     }
 
     if (event.key === "Enter" || event.key === " ") {
@@ -204,14 +163,12 @@ export class DropdownItemElement extends CustomElement {
 
       if (this.disabled) return;
 
-      // If item has submenu, open it instead of selecting
       if (this.hasSubmenuContent()) {
         event.stopPropagation();
         this.showSubmenu(true);
         return;
       }
 
-      // No submenu, dispatch select event
       this.dispatchEvent(
         new CustomEvent("itemSelect", {
           bubbles: true,
@@ -222,53 +179,39 @@ export class DropdownItemElement extends CustomElement {
     }
   }
 
-  /**
-   * Handles mouse enter events to show submenu.
-   */
+  @Bind
+  private handleCloseSubmenu(event: CustomEvent): void {
+    if (!this.isSubmenuOpen || !this.submenuElement) return;
+    const target = event.target as Node;
+    if (this.submenuElement.contains(target)) {
+      this.hideSubmenu();
+      requestAnimationFrame(() => this.focus());
+      event.stopPropagation();
+    }
+  }
+
   @Bind
   private handleMouseEnter(): void {
     if (!this.submenuElement || !this.hasSubmenuContent()) return;
-
     this.showSubmenu();
   }
 
-  /**
-   * Handles mouse leave events to hide submenu.
-   */
   @Bind
   private handleMouseLeave(event: MouseEvent): void {
     if (!this.submenuElement) return;
-
     const relatedTarget = event.relatedTarget as Node;
-
-    // Don't hide if moving to the submenu
-    if (relatedTarget && this.submenuElement.contains(relatedTarget)) {
-      return;
-    }
-
+    if (relatedTarget && this.submenuElement.contains(relatedTarget)) return;
     this.hideSubmenu();
   }
 
-  /**
-   * Shows the submenu popover and positions it.
-   *
-   * Note: focusing the first submenu item is opt-in. When the submenu is
-   * opened via keyboard navigation callers should pass `focusFirst = true` so
-   * the submenu receives keyboard focus. The default (`false`) preserves
-   * pointer/hover behavior and avoids unexpectedly moving focus on mouse open.
-   *
-   * @param {boolean} focusFirst - Whether to focus the first item in the submenu (default: false)
-   */
   private showSubmenu(focusFirst = false): void {
     if (!this.submenuElement || this.isSubmenuOpen) return;
 
-    // Apply critical styles before showing
     Object.assign(this.submenuElement.style, {
       minWidth: "180px",
       width: "max-content",
     });
 
-    // showPopover may throw in some UAs; guard the call
     try {
       this.submenuElement.showPopover();
     } catch {
@@ -276,7 +219,6 @@ export class DropdownItemElement extends CustomElement {
     }
     this.isSubmenuOpen = true;
 
-    // Add click listener to close submenu when clicking outside
     const closeSubmenuHandler = (event: MouseEvent) => {
       const target = event.target as Node;
       if (!this.submenuElement?.contains(target) && !this.contains(target)) {
@@ -285,29 +227,24 @@ export class DropdownItemElement extends CustomElement {
       }
     };
 
-    // Delay adding the listener to avoid immediately closing
     requestAnimationFrame(() => {
       document.addEventListener("click", closeSubmenuHandler);
     });
 
-    // Wait for layout to settle before positioning
     requestAnimationFrame(() => {
       if (!this.submenuElement) return;
 
-      // Position submenu - check if there's space on the right
       const rect = this.getBoundingClientRect();
       const submenuWidth = this.submenuElement.offsetWidth;
       const spaceOnRight = window.innerWidth - rect.right;
       const spaceOnLeft = rect.left;
 
-      // Position on the left if not enough space for submenu on the right
       if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
         this.submenuElement.style.left = `${rect.left - submenuWidth}px`;
       } else {
         this.submenuElement.style.left = `${rect.right}px`;
       }
 
-      // Compute clamped position so submenu stays within the viewport
       const submenuHeight = this.submenuElement.offsetHeight;
       let left: number;
       if (spaceOnRight < submenuWidth && spaceOnLeft > submenuWidth) {
@@ -316,18 +253,13 @@ export class DropdownItemElement extends CustomElement {
         left = rect.right;
       }
 
-      // Vertical: prefer aligning top with the parent item, but clamp
-      // so the submenu does not extend off the viewport.
       let top = rect.top;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      // Clamp left within viewport with 8px margin
       left = Math.min(Math.max(8, left), Math.max(8, viewportWidth - submenuWidth - 8));
 
-      // Clamp top within viewport with 8px margin
       if (top + submenuHeight + 8 > viewportHeight) {
-        // try to shift upwards so submenu fits
         top = Math.max(8, viewportHeight - submenuHeight - 8);
       }
       top = Math.max(8, top);
@@ -335,7 +267,6 @@ export class DropdownItemElement extends CustomElement {
       this.submenuElement.style.left = `${left}px`;
       this.submenuElement.style.top = `${top}px`;
 
-      // Focus first item when opening the submenu
       if (focusFirst) {
         this.#submenuFocusController.updateElements();
         this.#submenuFocusController.focusElement();
@@ -343,39 +274,26 @@ export class DropdownItemElement extends CustomElement {
     });
   }
 
-  /**
-   * Hides the submenu popover.
-   */
   private hideSubmenu(): void {
     if (!this.submenuElement || !this.isSubmenuOpen) return;
-
     try {
       this.submenuElement.hidePopover();
       this.isSubmenuOpen = false;
     } catch {
-      // Popover may already be hidden
+      // ignore
     }
   }
 
-  /**
-   * Update submenu state based on slot content
-   */
   @Bind
   private updateSubmenuState(): void {
     this.hasSubmenu = this.hasSubmenuContent();
     this.scheduleRender();
   }
 
-  /**
-   * Check if submenu slot has content
-   */
   private hasSubmenuContent(): boolean {
     return (this.submenuSlot?.assignedNodes({flatten: true}).length ?? 0) > 0;
   }
 
-  /**
-   * Renders the dropdown item.
-   */
   render(): VNode {
     return (
       <div classes={{
@@ -424,7 +342,6 @@ export class DropdownItemElement extends CustomElement {
   }
 }
 
-// TypeScript module augmentation for customized built-in elements
 declare global {
   interface HTMLElementTagNameMap {
     "pggm-dropdown-item": DropdownItemElement;

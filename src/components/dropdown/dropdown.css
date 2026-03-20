@@ -1,19 +1,19 @@
 :host{
-  box-sizing: border-box;  
-  
+  box-sizing: border-box;
+  /* Defaults for dropdown item theming variables, should be set with design tokens later */
+  --dropdown-padding: 0;
+  --dropdown-border-color: #ccc;
+  --dropdown-border-radius: 4px;
+  --dropdown-background: #fff;
+  --dropdown-color: #000;
+  --dropdown-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --dropdown-min-width: 120px;
+  --dropdown-z-index: 1000;
 }
-/*   
-.base {
-  display: contents;
-} */
-
 .menu {
   position: fixed;
   top: 0;
   left: 0;
-  /* Hidden by default; only shown when dropdown is opened or the
-     popover element has an `open` state. Hiding prevents the menu from
-     appearing at `left:0 top:0` on startup. */
   display: none;
   flex-direction: column;
   min-width: var(--dropdown-min-width, 120px);
@@ -28,13 +28,9 @@
   z-index: var(--dropdown-z-index, 1000);
   padding: var(--dropdown-padding, 0);
 }
-
-/* Show menu when host's `open` attribute is true */
 :host([open]) .menu {
   display: block;
 }
-
-/* Also show when the menu element itself is opened via the Popover API */
 .menu[open],
 .menu:popover-open {
   display: block;
