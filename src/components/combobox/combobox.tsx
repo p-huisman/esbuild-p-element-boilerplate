@@ -6,11 +6,12 @@ import { ComboBoxItemElement } from "./combobox-item";
 export { ComboBoxItemElement } from "./combobox-item";
 
 @CustomElementConfig({
-    tagName: "pggm-combobox",
+    tagName: "pggm-combobox"
 })
 export class ComboBoxElement extends CustomElement {
     static readonly TAG_NAME = "pggm-combobox";
     static readonly style = css;
+    static readonly delegatesFocus = true;
     static readonly formAssociated = true;
 
     private popupController?: PopupController;
@@ -23,6 +24,15 @@ export class ComboBoxElement extends CustomElement {
 
     @Property({ type: "boolean", reflect: true })
     multiple = false;
+
+    @Property({ type: "boolean", reflect: true })
+    required = false;
+
+    @Property({ type: "number", reflect: true })
+    min?: number;
+
+    @Property({ type: "number", reflect: true })
+    max?: number;
 
     @Property({ type: "string", reflect: true })
     name = "";
@@ -112,7 +122,6 @@ export class ComboBoxElement extends CustomElement {
                 return; // Will re-trigger updated() with the new array
             }
             this.syncSelectedItems();
-            this.updateFormValue();
         }
         
         if (propertyName === "multiple" && oldValue !== newValue) {
@@ -121,7 +130,7 @@ export class ComboBoxElement extends CustomElement {
             }
         }
         
-        if (propertyName === "name" && oldValue !== newValue) {
+        if (["value", "name", "multiple", "required", "min", "max"].includes(propertyName) && oldValue !== newValue) {
             this.updateFormValue();
         }
     }
@@ -145,14 +154,40 @@ export class ComboBoxElement extends CustomElement {
         const internals = (this as any).internals as ElementInternals | undefined;
         if (!internals) return;
 
+        let flags: ValidityStateFlags = {};
+        let validationMessage = "";
+        let valueCount = 0;
+
         if (this.multiple && Array.isArray(this.value)) {
             const formData = new FormData();
             for (const val of this.value) {
                 formData.append(this.name, String(val));
+                valueCount++;
             }
             internals.setFormValue(formData);
         } else {
-            internals.setFormValue(this.value ? String(this.value) : "");
+            const strVal = this.value ? String(this.value) : "";
+            internals.setFormValue(strVal);
+            valueCount = strVal ? 1 : 0;
+        }
+
+        if (this.required && valueCount === 0) {
+            flags.valueMissing = true;
+            validationMessage = "Please select an item.";
+        } else if (this.multiple) {
+            if (this.min !== undefined && valueCount < this.min) {
+                flags.rangeUnderflow = true;
+                validationMessage = `Please select at least ${this.min} item${this.min === 1 ? '' : 's'}.`;
+            } else if (this.max !== undefined && valueCount > this.max) {
+                flags.rangeOverflow = true;
+                validationMessage = `Please select no more than ${this.max} item${this.max === 1 ? '' : 's'}.`;
+            }
+        }
+
+        if (Object.keys(flags).length > 0) {
+            internals.setValidity(flags, validationMessage, this.textBox || undefined);
+        } else {
+            internals.setValidity({});
         }
     }
 

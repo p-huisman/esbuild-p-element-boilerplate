@@ -60,7 +60,7 @@ export class PComponentElement extends CustomElement {
 
           <form onsubmit={this.handleSubmit}>
             <p>
-              <pggm-combobox multiple name="test" value="banana">
+              <pggm-combobox multiple name="test" value="banana" required="required" min="2">
                 <pggm-combobox-item value="apple">Apple</pggm-combobox-item>
                 <pggm-combobox-item value="banana">Banana</pggm-combobox-item>
                 <pggm-combobox-item value="orange">Orange</pggm-combobox-item>
