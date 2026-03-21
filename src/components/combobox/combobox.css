@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  box-sizing: border-box;
+}
+
+.combobox {
+  position: relative;
+}
+
+.visual-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--combobox-border-color, #ccc);
+  border-radius: 4px;
+  padding: 4px 8px;
+  background: var(--combobox-bg, #fff);
+  cursor: text;
+}
+
+.visual-box:focus-within {
+  border-color: var(--combobox-focus-color, blue);
+  outline: 1px auto var(--combobox-focus-color, blue);
+}
+
+.visual-box.disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-area {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+}
+
+.clear-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.clear-button:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: #e0e0e0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 14px;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  margin-left: 4px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.tag-remove:hover {
+  color: red;
+}
+
+input {
+  flex: 1;
+  border: none;
+  outline: none;
+  min-width: 50px;
+  background: transparent;
+  padding: 4px 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input:disabled {
+  cursor: not-allowed;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  color: #666;
+}
+
+.dropdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 120px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: #000;
+  text-align: start;
+  user-select: none;
+  z-index: 1000;
+  padding: 0;
+}
+
+.dropdown:popover-open {
+  display: flex;
+}

@@ -2,6 +2,8 @@ import css from "./p-component.css";
 
 import "./components/dropdown/dropdown";
 import "./components/dropdown/dropdown-item";
+import "./components/combobox/combobox";
+import "./components/combobox/combobox-item";
 
 @CustomElementConfig({
   tagName: "p-component",

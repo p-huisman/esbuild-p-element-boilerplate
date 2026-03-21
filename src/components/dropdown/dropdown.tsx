@@ -1,8 +1,8 @@
-import {FocusGroupController} from "@pggm/helpers/src/focus-group-controller";
-import {PopupController} from "@pggm/helpers/src/popup-controller";
+import { FocusGroupController } from "../../helpers/focus-group-controller";
+import { PopupController } from "../../helpers/popup-controller";
 import css from "./dropdown.css";
 
-export {DropdownItemElement} from "./dropdown-item";
+export { DropdownItemElement } from "./dropdown-item";
 
 /**
  * Dropdown component that displays a menu of options when triggered.
@@ -30,7 +30,7 @@ export class DropdownElement extends CustomElement {
   static readonly TAG_NAME = "pggm-dropdown";
 
 
-  static readonly style =  css;
+  static readonly style = css;
 
   /** Counter for auto-generated menu ids */
   private static menuIdCounter = 0;
@@ -51,25 +51,25 @@ export class DropdownElement extends CustomElement {
    * Whether the dropdown is currently open.
    * @type {boolean}
    */
-  @Property({type: "boolean", reflect: true})
+  @Property({ type: "boolean", reflect: true })
   open = false;
 
   /**
    * The distance of the dropdown menu from its trigger.
    * @type {number}
    */
-  @Property({type: "number"})
+  @Property({ type: "number" })
   distance = 0;
 
   /**
    * The offset of the dropdown menu along its trigger.
    * @type {number}
    */
-  @Property({type: "number"})
+  @Property({ type: "number" })
   offset = 0;
 
   /** Horizontal alignment preference for the popup: auto|left|right|center */
-  @Property({type: "string", reflect: true})
+  @Property({ type: "string", reflect: true })
   align: "auto" | "left" | "right" | "center" = "auto";
 
   /** Reference to the menu element */
@@ -139,7 +139,7 @@ export class DropdownElement extends CustomElement {
         const realEl =
           pid && container?.querySelector
             ? container.querySelector(`[data-pggm-popup-id="${pid}"]`) ||
-              popupEl
+            popupEl
             : popupEl;
         if (realEl && realEl instanceof HTMLElement && typeof realEl.addEventListener === "function") {
           this.attachedToggleElement = realEl;
@@ -387,7 +387,7 @@ export class DropdownElement extends CustomElement {
           document.addEventListener(
             "touchstart",
             this.outsideClickHandler,
-            {passive: true, capture: true} as AddEventListenerOptions,
+            { passive: true, capture: true } as AddEventListenerOptions,
           );
         }
       });
@@ -552,9 +552,9 @@ export class DropdownElement extends CustomElement {
 
     const handler = () => this.updateMenuPosition();
     for (const ancestor of scrollableAncestors) {
-      ancestor.addEventListener("scroll", handler, {passive: true});
+      ancestor.addEventListener("scroll", handler, { passive: true });
     }
-    window.addEventListener("resize", handler, {passive: true});
+    window.addEventListener("resize", handler, { passive: true });
     this.removeScrollListeners = () => {
       for (const ancestor of scrollableAncestors) {
         ancestor.removeEventListener("scroll", handler);
@@ -822,7 +822,7 @@ export class DropdownElement extends CustomElement {
     const slot = menu.querySelector<HTMLSlotElement>("slot");
     if (!slot) return [];
 
-    const assigned = slot.assignedNodes({flatten: true});
+    const assigned = slot.assignedNodes({ flatten: true });
     const items: HTMLElement[] = [];
     for (const node of assigned) {
       if (!(node instanceof HTMLElement)) continue;

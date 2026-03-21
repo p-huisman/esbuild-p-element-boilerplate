@@ -1,4 +1,4 @@
-import {FocusGroupController} from "@pggm/helpers/src/focus-group-controller";
+import { FocusGroupController } from "../../helpers/focus-group-controller";
 import css from "./dropdown-item.css";
 
 /**
@@ -28,13 +28,13 @@ export class DropdownItemElement extends CustomElement {
 
   static readonly style = css;
 
-  @Property({type: "boolean", reflect: true})
+  @Property({ type: "boolean", reflect: true })
   disabled = false;
 
-  @Property({type: "boolean", reflect: true})
+  @Property({ type: "boolean", reflect: true })
   checked = false;
 
-  @Property({type: "string"})
+  @Property({ type: "string" })
   value = "";
 
   @Query("#submenu")
@@ -43,7 +43,7 @@ export class DropdownItemElement extends CustomElement {
   @Query('slot[name="submenu"]')
   private readonly submenuSlot?: HTMLSlotElement;
 
-  @Property({type: "boolean"})
+  @Property({ type: "boolean" })
   private hasSubmenu = false;
 
   private isSubmenuOpen = false;
@@ -54,7 +54,7 @@ export class DropdownItemElement extends CustomElement {
       direction: "vertical",
       elements: () => {
         if (!this.submenuSlot) return [];
-        const assigned = this.submenuSlot.assignedNodes({flatten: true});
+        const assigned = this.submenuSlot.assignedNodes({ flatten: true });
         const items: HTMLElement[] = [];
         for (const node of assigned) {
           if (node instanceof HTMLElement) {
@@ -84,7 +84,7 @@ export class DropdownItemElement extends CustomElement {
     this.addEventListener("keydown", this.handleKeyDown);
     this.addEventListener("mouseenter", this.handleMouseEnter);
     this.addEventListener("mouseleave", this.handleMouseLeave);
-    this.addEventListener("touchstart", this.handleTouchStart, {passive: true} as AddEventListenerOptions);
+    this.addEventListener("touchstart", this.handleTouchStart, { passive: true } as AddEventListenerOptions);
     this.addEventListener("closeSubmenu" as any, this.handleCloseSubmenu as any);
     this.#submenuFocusController.connected();
 
@@ -119,7 +119,7 @@ export class DropdownItemElement extends CustomElement {
       new CustomEvent("itemSelect", {
         bubbles: true,
         composed: true,
-        detail: {item: this},
+        detail: { item: this },
       }),
     );
   }
@@ -153,7 +153,7 @@ export class DropdownItemElement extends CustomElement {
     }
 
     if (event.key === "ArrowLeft") {
-      const closeEvt = new CustomEvent("closeSubmenu", {bubbles: true, composed: true});
+      const closeEvt = new CustomEvent("closeSubmenu", { bubbles: true, composed: true });
       this.dispatchEvent(closeEvt);
       return;
     }
@@ -173,7 +173,7 @@ export class DropdownItemElement extends CustomElement {
         new CustomEvent("itemSelect", {
           bubbles: true,
           composed: true,
-          detail: {item: this},
+          detail: { item: this },
         }),
       );
     }
@@ -291,7 +291,7 @@ export class DropdownItemElement extends CustomElement {
   }
 
   private hasSubmenuContent(): boolean {
-    return (this.submenuSlot?.assignedNodes({flatten: true}).length ?? 0) > 0;
+    return (this.submenuSlot?.assignedNodes({ flatten: true }).length ?? 0) > 0;
   }
 
   render(): VNode {
@@ -302,7 +302,7 @@ export class DropdownItemElement extends CustomElement {
         "disabled": this.disabled,
       }}>
         {this.checked && (
-          <span class="icon">
+          <span key="icon-check" class="icon">
             <svg
               fill="currentColor"
               viewBox="0 0 1920 1920"
@@ -334,7 +334,7 @@ export class DropdownItemElement extends CustomElement {
         <div class="submenu" id="submenu" popover="manual">
           <slot
             name="submenu"
-            on={{slotchange: this.updateSubmenuState}}
+            on={{ slotchange: this.updateSubmenuState }}
           ></slot>
         </div>
       </div>
