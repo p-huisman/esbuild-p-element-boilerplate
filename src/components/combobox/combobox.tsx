@@ -11,6 +11,7 @@ export { ComboBoxItemElement } from "./combobox-item";
 export class ComboBoxElement extends CustomElement {
     static readonly TAG_NAME = "pggm-combobox";
     static readonly style = css;
+    static readonly formAssociated = true;
 
     private popupController?: PopupController;
 
@@ -22,6 +23,9 @@ export class ComboBoxElement extends CustomElement {
 
     @Property({ type: "boolean", reflect: true })
     multiple = false;
+
+    @Property({ type: "string", reflect: true })
+    name = "";
 
     @Property({ attribute: "with-clear", type: "boolean", reflect: true })
     withClear = false;
@@ -58,6 +62,12 @@ export class ComboBoxElement extends CustomElement {
 
     connectedCallback(): void {
         super.connectedCallback();
+        
+        // Run initial coercion if HTML value attribute is set before JS connection
+        if (this.multiple && typeof this.value === "string" && this.value.length > 0) {
+            this.value = this.value.split(',').map(v => v.trim());
+        }
+
         this.addEventListener("itemSelect" as any, this.handleItemSelect as EventListener);
         this.addEventListener("itemHover" as any, this.handleItemHover as EventListener);
         document.addEventListener("pointerdown", this.handleOutsideEvent);
@@ -96,7 +106,23 @@ export class ComboBoxElement extends CustomElement {
         }
 
         if (propertyName === "value" && oldValue !== newValue) {
+            // Coerce string arrays dynamically set via JS property assignments
+            if (this.multiple && typeof this.value === "string" && this.value.length > 0) {
+                this.value = this.value.split(',').map(v => v.trim());
+                return; // Will re-trigger updated() with the new array
+            }
             this.syncSelectedItems();
+            this.updateFormValue();
+        }
+        
+        if (propertyName === "multiple" && oldValue !== newValue) {
+            if (this.multiple && typeof this.value === "string" && this.value.length > 0) {
+                this.value = this.value.split(',').map(v => v.trim());
+            }
+        }
+        
+        if (propertyName === "name" && oldValue !== newValue) {
+            this.updateFormValue();
         }
     }
 
@@ -114,6 +140,41 @@ export class ComboBoxElement extends CustomElement {
         }
         return items;
     }
+
+    private updateFormValue() {
+        const internals = (this as any).internals as ElementInternals | undefined;
+        if (!internals) return;
+
+        if (this.multiple && Array.isArray(this.value)) {
+            const formData = new FormData();
+            for (const val of this.value) {
+                formData.append(this.name, String(val));
+            }
+            internals.setFormValue(formData);
+        } else {
+            internals.setFormValue(this.value ? String(this.value) : "");
+        }
+    }
+
+    formResetCallback() {
+        this.value = this.multiple ? [] : "";
+        this.inputValue = "";
+        this.filterItems("");
+        this.updateFormValue();
+        this.scheduleRender();
+    }
+
+    formDisabledCallback(disabled: boolean) {
+        this.disabled = disabled;
+    }
+
+    public get form() { return (this as any).internals?.form; }
+    public get type() { return this.localName; }
+    public get validity() { return (this as any).internals?.validity; }
+    public get validationMessage() { return (this as any).internals?.validationMessage; }
+    public get willValidate() { return (this as any).internals?.willValidate; }
+    public checkValidity() { return (this as any).internals?.checkValidity(); }
+    public reportValidity() { return (this as any).internals?.reportValidity(); }
 
     private syncSelectedItems() {
         const items = this.getItems();
@@ -392,6 +453,7 @@ export class ComboBoxElement extends CustomElement {
 
     @Bind
     private handleSlotChange() {
+        this.#focusGroupController.updateElements();
         this.syncSelectedItems();
         this.filterItems(this.inputValue);
     }
@@ -442,7 +504,7 @@ export class ComboBoxElement extends CustomElement {
     private updateMenuPosition(): void {
         if (!this.dropdown || !this.visualBox) return;
         const triggerRect = this.visualBox.getBoundingClientRect();
-        
+
         let itemsMaxHeight = Infinity;
         if (this.visibleItems && this.visibleItems > 0 && this.filteredItems.length > 0) {
             const itemHeight = this.filteredItems[0].offsetHeight || 36;
@@ -461,10 +523,10 @@ export class ComboBoxElement extends CustomElement {
             if (y < 0) y = 0;
         }
 
-        const availableSpace = y === triggerRect.bottom 
-            ? globalThis.innerHeight - y - 16 
+        const availableSpace = y === triggerRect.bottom
+            ? globalThis.innerHeight - y - 16
             : triggerRect.top - 16;
-            
+
         const finalMaxHeight = Math.min(availableSpace, itemsMaxHeight);
 
         if (y !== triggerRect.bottom) {
@@ -479,7 +541,7 @@ export class ComboBoxElement extends CustomElement {
             minWidth: `${triggerRect.width}px`,
             maxWidth: `${globalThis.innerWidth - triggerRect.left - 16}px`
         });
-        
+
         this.dropdown.style.setProperty('max-height', `${finalMaxHeight}px`, 'important');
     }
 

@@ -39,6 +39,13 @@ export class PComponentElement extends CustomElement {
   @RenderOnSet
   public name: string;
 
+  private handleSubmit = (event: Event) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    console.log(formData.getAll("test"));
+  };
+
   private render = () => {
     return (
       <div class="greeting-container">
@@ -50,6 +57,25 @@ export class PComponentElement extends CustomElement {
         </div>
         <div class="greeting-main">
           <div class="greeting">{this.#greeting}</div>
+
+          <form onsubmit={this.handleSubmit}>
+            <p>
+              <pggm-combobox multiple name="test" value="banana">
+                <pggm-combobox-item value="apple">Apple</pggm-combobox-item>
+                <pggm-combobox-item value="banana">Banana</pggm-combobox-item>
+                <pggm-combobox-item value="orange">Orange</pggm-combobox-item>
+              </pggm-combobox>
+            </p>
+            <p>
+              <pggm-combobox name="test2" value="banana">
+                <pggm-combobox-item value="apple">Apple</pggm-combobox-item>
+                <pggm-combobox-item value="banana">Banana</pggm-combobox-item>
+                <pggm-combobox-item value="orange">Orange</pggm-combobox-item>
+              </pggm-combobox>
+            </p>
+            <button type="submit">Submit</button>
+          </form>
+
           <slot></slot>
         </div>
         <div class="greeting-footer">
