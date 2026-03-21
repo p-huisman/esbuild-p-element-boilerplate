@@ -4,18 +4,42 @@ import css from "./combobox-item.css";
 @CustomElementConfig({
     tagName: "pggm-combobox-item"
 })
+/**
+ * `<pggm-combobox-item>` — A single selectable option inside a `<pggm-combobox>`.
+ *
+ * @element pggm-combobox-item
+ *
+ * @slot         - The label text shown in the dropdown and in the selected tag.
+ * @slot icon    - Optional icon shown to the left of the label.
+ * @slot details - Optional secondary text shown to the right of the label.
+ *                 Content in this slot is intentionally excluded from the tag label.
+ *
+ * @fires itemSelect - Bubbles up when the item is activated (click or Enter/Space).
+ * @fires itemHover  - Bubbles up when the pointer enters the item.
+ *
+ * @attr {boolean} disabled - Prevents the item from being selected.
+ * @attr {boolean} selected - Reflects whether this item is currently selected.
+ * @attr {string}  value    - The value submitted to the form / stored in the combobox.
+ *                            Defaults to the trimmed default-slot text when omitted.
+ */
 export class ComboBoxItemElement extends CustomElement {
     static readonly TAG_NAME = "pggm-combobox-item";
     static readonly observedAttributes = ["disabled", "selected", "value"];
 
     static readonly style = css;
 
+    /** When `true`, the item cannot be focused or selected. */
     @Property({ type: "boolean", reflect: true })
     disabled = false;
 
+    /** When `true`, the item is visually marked as selected and carries `aria-selected="true"`. */
     @Property({ type: "boolean", reflect: true })
     selected = false;
 
+    /**
+     * The value that is stored in the parent combobox when this item is selected.
+     * Falls back to the trimmed default-slot text when left empty.
+     */
     @Property({ type: "string" })
     value = "";
 
@@ -82,8 +106,19 @@ export class ComboBoxItemElement extends CustomElement {
         );
     }
 
+    /**
+     * Returns the visible label text of this item, derived solely from the
+     * default (unnamed) slot. Named-slot content (e.g. `slot="details"`) is
+     * intentionally excluded so that tags and `inputValue` only reflect the
+     * primary label.
+     */
     getLabelText(): string {
-        return this.textContent?.trim() || "";
+        // Only collect text from nodes assigned to the default (unnamed) slot,
+        // excluding named slots such as "detail".
+        const defaultSlotNodes = Array.from(this.childNodes).filter(
+            node => !(node instanceof Element && node.hasAttribute("slot"))
+        );
+        return defaultSlotNodes.map(n => n.textContent).join("").trim() || "";
     }
 
     render(): VNode {

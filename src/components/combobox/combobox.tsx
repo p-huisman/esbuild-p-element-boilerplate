@@ -8,6 +8,28 @@ export { ComboBoxItemElement } from "./combobox-item";
 @CustomElementConfig({
     tagName: "pggm-combobox"
 })
+/**
+ * `<pggm-combobox>` — A form-associated combobox (single or multi-select) with
+ * an inline text filter, keyboard navigation, and an anchored dropdown.
+ *
+ * @element pggm-combobox
+ *
+ * @slot         - Place one or more `<pggm-combobox-item>` elements here.
+ * @slot start   - Optional content rendered before the text input (e.g. an icon).
+ *
+ * @fires change - Fired (bubbles, composed) whenever the selected value changes.
+ *
+ * @attr {boolean} open          - Controls dropdown visibility.
+ * @attr {boolean} disabled      - Disables the entire control.
+ * @attr {boolean} multiple      - Enables multi-select mode; `value` becomes `string[]`.
+ * @attr {boolean} required      - Marks the field as required for form validation.
+ * @attr {number}  min           - Minimum number of selections required (multi only).
+ * @attr {number}  max           - Maximum number of selections allowed (multi only).
+ * @attr {string}  name          - Form field name submitted with the form.
+ * @attr {boolean} with-clear    - Shows a clear button when a value is selected.
+ * @attr {number}  visible-items - Max number of items visible before the dropdown scrolls.
+ * @attr {string}  placeholder   - Placeholder text for the text input.
+ */
 export class ComboBoxElement extends CustomElement {
     static readonly TAG_NAME = "pggm-combobox";
     static readonly style = css;
@@ -16,39 +38,67 @@ export class ComboBoxElement extends CustomElement {
 
     private popupController?: PopupController;
 
+    /** Whether the dropdown is currently open. */
     @Property({ type: "boolean", reflect: true })
     open = false;
 
+    /** When `true`, the control is non-interactive and its value is not submitted. */
     @Property({ type: "boolean", reflect: true })
     disabled = false;
 
+    /**
+     * When `true`, multiple items can be selected simultaneously.
+     * Selected items are displayed as removable tags and `value` is a `string[]`.
+     */
     @Property({ type: "boolean", reflect: true })
     multiple = false;
 
+    /** When `true`, form submission fails if no item is selected. */
     @Property({ type: "boolean", reflect: true })
     required = false;
 
+    /** Minimum number of items that must be selected (multi-select only). */
     @Property({ type: "number", reflect: true })
     min?: number;
 
+    /** Maximum number of items that may be selected (multi-select only). */
     @Property({ type: "number", reflect: true })
     max?: number;
 
+    /** The `name` attribute used when the value is submitted as part of a form. */
     @Property({ type: "string", reflect: true })
     name = "";
 
+    /** When `true`, a clear button is rendered whenever a value is selected. */
     @Property({ attribute: "with-clear", type: "boolean", reflect: true })
     withClear = false;
 
+    /**
+     * Limits the dropdown height to this many items before scrolling.
+     * When omitted the dropdown grows to fit all items.
+     */
     @Property({ attribute: "visible-items", type: "number" })
     visibleItems?: number;
 
+    /** Placeholder text shown in the text input when nothing is selected. */
     @Property({ type: "string" })
     placeholder = "";
 
+    /**
+     * The current value of the combobox.
+     * - Single-select: a `string` holding the selected item's value.
+     * - Multi-select:  a `string[]` holding each selected item's value.
+     *
+     * Setting this property programmatically triggers item synchronisation
+     * and form-value update automatically.
+     */
     @Property()
     value: string | string[] = "";
 
+    /**
+     * The current text displayed in the filter input.
+     * Updated automatically when an item is selected or the user types.
+     */
     @Property({ type: "string" })
     inputValue = "";
 
