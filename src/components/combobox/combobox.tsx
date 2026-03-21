@@ -252,10 +252,9 @@ export class ComboBoxElement extends CustomElement {
 
         this.#focusGroupController.updateElements();
 
-        if (this.filteredItems.length === 0 && this.open) {
+        // Only auto-close if the user actively filtered the list down to 0 by typing.
+        if (this.filteredItems.length === 0 && this.open && query) {
             this.open = false;
-        } else if (this.filteredItems.length > 0 && this.visualBox?.matches(':focus-within') && !this.open) {
-            this.open = true;
         }
     }
 
@@ -279,9 +278,8 @@ export class ComboBoxElement extends CustomElement {
     private handleFocus() {
         this.isFocused = true;
         this.filterItems(this.inputValue);
-        if (!this.open && this.filteredItems.length > 0) {
-            this.open = true;
-        }
+        // Do NOT automatically set this.open = true just because focus was natively gained.
+        // It competes with mouse interaction sequences and causes a toggling paradox.
     }
 
     @Bind
@@ -669,7 +667,6 @@ export class ComboBoxElement extends CustomElement {
                     class="dropdown"
                     role="listbox"
                     popover="manual"
-                    hidden
                     on={{ pointerdown: (e: Event) => e.preventDefault() }}
                 >
                     <slot on={{ slotchange: this.handleSlotChange }}></slot>
