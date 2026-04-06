@@ -5,10 +5,10 @@ import "./components/dropdown/dropdown-item";
 import "./components/combobox/combobox";
 import "./components/combobox/combobox-item";
 import "./components/page/page";
-import "./components/navigation-menu/navigation-menu";
-import "./components/navigation-menu/nav-section";
-import "./components/navigation-menu/nav-category";
-import "./components/navigation-menu/nav-item";
+import "./components/page-navigation-menu/navigation-menu";
+import "./components/page-navigation-menu/nav-section";
+import "./components/page-navigation-menu/nav-category";
+import "./components/page-navigation-menu/nav-item";
 
 @CustomElementConfig({
   tagName: "p-component",

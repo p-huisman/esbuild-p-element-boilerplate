@@ -1,10 +1,10 @@
 import css from "./nav-item.css";
 
 @CustomElementConfig({
-    tagName: "pggm-nav-item"
+    tagName: PageNavItemElement.TAG_NAME
 })
-export class NavItemElement extends CustomElement {
-    static readonly TAG_NAME = "pggm-nav-item";
+export class PageNavItemElement extends CustomElement {
+    static readonly TAG_NAME = "pggm-page-nav-item";
     static readonly style = css;
 
     @Property({ type: "string" })
@@ -28,6 +28,6 @@ export class NavItemElement extends CustomElement {
 
 declare global {
     interface HTMLElementTagNameMap {
-        "pggm-nav-item": NavItemElement;
+        [PageNavItemElement.TAG_NAME]: PageNavItemElement;
     }
 }

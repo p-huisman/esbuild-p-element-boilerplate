@@ -1,10 +1,10 @@
 import css from "./nav-category.css";
 
 @CustomElementConfig({
-    tagName: "pggm-nav-category"
+    tagName: PageNavCategoryElement.TAG_NAME
 })
-export class NavCategoryElement extends CustomElement {
-    static readonly TAG_NAME = "pggm-nav-category";
+export class PageNavCategoryElement extends CustomElement {
+    static readonly TAG_NAME = "pggm-page-nav-category";
     static readonly style = css;
 
     @Property({ type: "string" })
@@ -18,11 +18,13 @@ export class NavCategoryElement extends CustomElement {
         this.expanded = !this.expanded;
     };
 
+    
+
     render(): VNode {
         return (
             <div class={`category-wrapper ${this.expanded ? "expanded" : ""}`} part="base">
                 <a 
-                    href="javascript:void(0)"
+                    href="#"
                     role="button"
                     aria-expanded={this.expanded.toString()}
                     class="category-header" 
@@ -44,6 +46,6 @@ export class NavCategoryElement extends CustomElement {
 
 declare global {
     interface HTMLElementTagNameMap {
-        "pggm-nav-category": NavCategoryElement;
+        [PageNavCategoryElement.TAG_NAME]: PageNavCategoryElement;
     }
 }

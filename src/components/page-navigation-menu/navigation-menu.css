@@ -12,3 +12,7 @@
     flex-direction: column;
     height: 100%;
 }
+
+.actions-container {
+    margin: 0.5rem 1.5rem 0.5rem calc(1.5rem + var(--nav-indent-l2, 12px));
+}

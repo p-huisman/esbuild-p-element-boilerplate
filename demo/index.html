@@ -128,7 +128,7 @@
         }
 
         /* Navigation Sidebar */
-        .demo-nav {
+        /* .demo-nav {
             height: 100%;
             padding: 1.5rem 0;
             box-sizing: border-box;
@@ -152,7 +152,7 @@
             color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.2em;
-        }
+        } */
 
         /* .nav-links {
             flex: 1;
@@ -178,13 +178,34 @@
             border-left: 4px solid var(--primary);
             font-weight: bold;
         } */
-
+/* 
         .nav-bottom {
             padding: 0 1rem;
             margin-top: auto;
         }
 
         .btn-new {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-new:hover {
+            opacity: 0.9;
+        } */
+
+        /* navigation actions */
+         .btn-new {
             width: 100%;
             background-color: var(--primary);
             color: white;
@@ -396,49 +417,39 @@
             </div>
         </div>
 
-        <!-- Sidebar Navigation (slot: navigation) -->
-        <div slot="navigation" class="demo-nav flex-col">
-            <div class="logo-area flex-row justify-between" style="padding-top: 1rem;">
-                <div>
-                    <div class="title" style="color: var(--secondary);">PGGM</div>
-                    <div class="subtitle" style="color: var(--text-secondary);">Institutional Atelier</div>
-                </div>
-                <button class="mobile-toggle material-symbols-outlined mobile-only"
-                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">close</button>
-            </div>
-            <div style="flex: 1; overflow-y: auto;">
-                <pggm-navigation-menu>
-                    <pggm-nav-section>
-                        <span slot="icon" class="material-symbols-outlined section-icon">dashboard</span>
-                        <span slot="label">Portfolios</span>
+       
+        <pggm-page-navigation-menu slot="navigation">
+            <pggm-page-nav-section>
+                <span slot="icon" class="material-symbols-outlined section-icon">dashboard</span>
+                <span slot="label">Portfolios</span>
 
-                        <pggm-nav-category label="Multi-Asset Fund" expanded>
-                            <pggm-nav-item href="#" active>Portfolio Overview</pggm-nav-item>
-                            <pggm-nav-item href="#">Asset Allocation</pggm-nav-item>
-                            <pggm-nav-item href="#">Risk Analytics</pggm-nav-item>
-                        </pggm-nav-category>
-                        <pggm-nav-category label="Global Equities">
-                            <pggm-nav-item href="#">Overview</pggm-nav-item>
-                        </pggm-nav-category>
-                        <pggm-nav-category label="Real Estate">
-                            <pggm-nav-item href="#">Overview</pggm-nav-item>
-                        </pggm-nav-category>
-                    </pggm-nav-section>
-                    <pggm-nav-section>
-                        <span slot="icon" class="material-symbols-outlined section-icon">groups</span>
-                        <span slot="label">Stakeholders</span>
-                        <pggm-nav-item href="#">Client Reporting</pggm-nav-item>
-                        <pggm-nav-item href="#">Trustees</pggm-nav-item>
-                    </pggm-nav-section>
-                </pggm-navigation-menu>
-            </div>
-            <div class="nav-bottom">
-                <button class="btn-new flex-row">
-                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-                    <span>New Analysis</span>
-                </button>
-            </div>
-        </div>
+                <pggm-page-nav-category label="Multi-Asset Fund" expanded>
+                    <pggm-page-nav-item href="#" active>Portfolio Overview</pggm-page-nav-item>
+                    <pggm-page-nav-item href="#">Asset Allocation</pggm-page-nav-item>
+                    <pggm-page-nav-item href="#">Risk Analytics</pggm-page-nav-item>
+                </pggm-page-nav-category>
+                <pggm-page-nav-category label="Global Equities">
+                    <pggm-page-nav-item href="#">Overview</pggm-page-nav-item>
+                </pggm-page-nav-category>
+                <pggm-page-nav-category label="Real Estate">
+                    <pggm-page-nav-item href="#">Overview</pggm-page-nav-item>
+                </pggm-page-nav-category>
+            </pggm-page-nav-section>
+            <pggm-page-nav-section>
+                <span slot="icon" class="material-symbols-outlined section-icon">groups</span>
+                <span slot="label">Stakeholders</span>
+                <pggm-page-nav-item href="#">Client Reporting</pggm-page-nav-item>
+                <pggm-page-nav-item href="#">Trustees</pggm-page-nav-item>
+            </pggm-page-nav-section>
+
+            <div slot="actions">
+              <button class="btn-new flex-row">
+                  <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+                  <span>New Analysis</span>
+              </button>
+          </div>
+        </pggm-page-navigation-menu>
+           
 
         <!-- Main Content (Default Slot) -->
         <div class="dashboard-content">
