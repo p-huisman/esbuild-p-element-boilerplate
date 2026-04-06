@@ -1,0 +1,14 @@
+:host {
+    display: block;
+    width: 100%;
+    background-color: var(--nav-bg-primary, #ffffff);
+    font-family: var(--nav-font-family, 'Public Sans', sans-serif);
+    color: var(--nav-text-main, #1e293b);
+    overflow-x: hidden;
+}
+
+.navigation-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}

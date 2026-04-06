@@ -1,0 +1,33 @@
+:host {
+    display: block;
+    margin-bottom: var(--spacing-4, 1rem);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    font-size: var(--nav-font-size-l1, 0.75rem);
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-secondary, #64748b);
+    padding: 0.75rem 1.5rem 0.25rem 1.5rem;
+    letter-spacing: 0.05em;
+    user-select: none;
+}
+
+.section-icon, ::slotted([slot="icon"]) {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-label, ::slotted([slot="label"]) {
+    font-size: var(--nav-font-size-l1, 0.75rem);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.section-content {
+    display: block;
+}

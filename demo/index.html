@@ -2,100 +2,560 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>p-component</title>
-  <link rel="stylesheet" href="../dist/styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PGGM | Institutional Manager Portfolio</title>
+    <!-- Use components CSS from package -->
+    <link rel="stylesheet" href="../dist/styles.css" />
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* CSS reset & base variables mapping */
+        :root {
+            --surface-container-low: #f2f4f6;
+            --surface-container-lowest: #ffffff;
+            --surface-container-high: #e6e8ea;
+            --primary: #008751;
+            --secondary: #003168;
+            --tertiary: #d32f2f;
+            --outline-variant: #bdcabe;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Public Sans', sans-serif;
+            background-color: #f7f9fb;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Demo Layout Specific CSS (Vanilla instead of Tailwind) */
+        .flex-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        /* Header specific */
+        .demo-header {
+            width: 100%;
+        }
+
+        .demo-header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .search-box {
+            position: relative;
+            margin-left: 1.5rem;
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .search-box {
+                display: block;
+            }
+        }
+
+        .search-box input {
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            background-color: var(--surface-container-low);
+            border: none;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            width: 300px;
+            font-family: inherit;
+        }
+
+        .search-box .icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .header-actions {
+            gap: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .header-actions span {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .header-actions span:hover {
+            color: var(--primary);
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 2rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            margin: 0 1rem;
+        }
+
+        .user-profile {
+            gap: 0.75rem;
+            text-align: right;
+        }
+
+        .user-profile img {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--surface-container-low);
+        }
+
+        /* Navigation Sidebar */
+        .demo-nav {
+            height: 100%;
+            padding: 1.5rem 0;
+            box-sizing: border-box;
+        }
+
+        .logo-area {
+            padding: 0 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-area .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .logo-area .subtitle {
+            font-size: 0.625rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        /* .nav-links {
+            flex: 1;
+        }
+
+        .nav-links a {
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            gap: 0.75rem;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            font-weight: bold;
+        } */
+
+        .nav-bottom {
+            padding: 0 1rem;
+            margin-top: auto;
+        }
+
+        .btn-new {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-new:hover {
+            opacity: 0.9;
+        }
+
+        /* Main Area Content */
+        .dashboard-content {
+            max-width: 1200px;
+            margin: 1rem auto;
+            width: 100%;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background-color: var(--surface-container-lowest);
+            padding: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card.green {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .card-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .card.green .card-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .card-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--secondary);
+            gap: 0.5rem;
+            align-items: baseline;
+        }
+
+        .card.green .card-value {
+            color: white;
+            justify-content: space-between;
+        }
+
+        .card-metric {
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-metric.positive {
+            color: var(--primary);
+        }
+
+        .card-metric.negative {
+            color: var(--tertiary);
+        }
+
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .card.green .card-footer {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tag {
+            font-size: 0.625rem;
+            background-color: rgba(0, 135, 81, 0.1);
+            color: var(--primary);
+            padding: 0.125rem 0.5rem;
+            border-radius: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tag.white {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: white;
+            width: 84%;
+        }
+
+        /* Demo Chart layout */
+        .chart-box {
+            position: relative;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .chart-lines {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .chart-lines div {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Demo Interactive Box */
+        .interactive-box {
+            background-color: var(--surface-container-lowest);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 5rem;
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-only {
+                display: block;
+            }
+
+            .desktop-only {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <p-component name="World">
-    <div slot="header">Greeting boilerplate</div>
-    <div slot="aside">
-      <ul>
-        <li><a href="https://github.com/p-huisman/esbuild-p-element-boilerplate#readme">Readme</a></li>
-        <li>
-          <h2>Css</h2>
-        </li>
-        <li><a href="https://www.joshwcomeau.com/css/interactive-guide-to-flexbox/">CSS Flexbox guide</a></li>
-        <li><a href="https://www.joshwcomeau.com/css/interactive-guide-to-grid/">CSS Grid guide</a></li>
-        <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries">CSS container
-            queries</a></li>
-      </ul>
 
-      <pggm-combobox placeholder="Select a fruit">
-        <pggm-combobox-item>Apple</pggm-combobox-item>
-        <pggm-combobox-item>Banana</pggm-combobox-item>
-        <pggm-combobox-item>Orange</pggm-combobox-item>
-      </pggm-combobox>
+    <pggm-page>
+        <!-- TopAppBar (slot: header) -->
+        <div slot="header" class="demo-header flex-row justify-between">
+            <div class="flex-row" style="gap: 1.5rem;">
+                <button class="mobile-toggle material-symbols-outlined mobile-only"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">menu</button>
+                <div class="demo-header-title">Institutional Manager</div>
+                <div class="search-box">
+                    <span class="icon material-symbols-outlined">search</span>
+                    <input placeholder="Search portfolios or assets..." type="text" />
+                </div>
+            </div>
 
-      <pggm-combobox placeholder="Select a fruit" with-clear>
-        <pggm-combobox-item>Apple</pggm-combobox-item>
-        <pggm-combobox-item>Banana</pggm-combobox-item>
-        <pggm-combobox-item>Orange</pggm-combobox-item>
-      </pggm-combobox>
+            <div class="flex-row" style="gap: 1.25rem;">
+                <div class="header-actions flex-row desktop-only">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="material-symbols-outlined">history</span>
+                    <span class="material-symbols-outlined">help_outline</span>
+                </div>
+                <div class="header-divider desktop-only"></div>
+                <div class="user-profile flex-row">
+                    <div class="desktop-only text-right">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--on-surface);">Admin User</div>
+                        <div style="font-size: 0.625rem; color: var(--text-secondary);">Portfolio Director</div>
+                    </div>
+                    <img alt="Administrator Profile"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDBnoFf6oliWaCaHJb5ViX1wrjsvBYDn1PsVRVIhmv49ukCzD3GQAU4hE9YJY7GMVUA7Ppc0P7UKQd66RusEi_LU1OWyL3BmEZAsnDpTrJ90dKtbojlrNj6DrlwaMh66tfiiXcVYI3CriQZ1KTU7LHTu07UlE4T9cUWrFAczkHVRI_jU4htBPHdMzLNMNGoyrnO5_1vYa-ytzXIsWSqyH84RxcemwDBq5h6pBsSrjEdsgHNPxlZBQLa4lTyKNoMmzlc8fXNcSlVkg" />
+                </div>
+            </div>
+        </div>
 
-      <pggm-combobox visible-items="4" multiple placeholder="Select a fruit" with-clear>
-        <pggm-combobox-item disabled>Apple</pggm-combobox-item>
-        <pggm-combobox-item>Banana</pggm-combobox-item>
-        <pggm-combobox-item>Orange</pggm-combobox-item>
-        <pggm-combobox-item>Pear</pggm-combobox-item>
-        <pggm-combobox-item>Grape</pggm-combobox-item>
-        <pggm-combobox-item>Mango</pggm-combobox-item>
-        <pggm-combobox-item>Pineapple</pggm-combobox-item>
-        <pggm-combobox-item>Strawberry</pggm-combobox-item>
-        <pggm-combobox-item>Watermelon</pggm-combobox-item>
-        <pggm-combobox-item>Blueberry</pggm-combobox-item>
-        <pggm-combobox-item>Raspberry</pggm-combobox-item>
-        <pggm-combobox-item>Blackberry</pggm-combobox-item>
-        <pggm-combobox-item>Kiwi</pggm-combobox-item>
-        <pggm-combobox-item>Peach</pggm-combobox-item>
-        <pggm-combobox-item>Plum</pggm-combobox-item>
-        <pggm-combobox-item>Cherry</pggm-combobox-item>
-        <pggm-combobox-item>Lemon</pggm-combobox-item>
-        <pggm-combobox-item>Lime</pggm-combobox-item>
-        <pggm-combobox-item>Grapefruit</pggm-combobox-item>
-      </pggm-combobox>
+        <!-- Sidebar Navigation (slot: navigation) -->
+        <div slot="navigation" class="demo-nav flex-col">
+            <div class="logo-area flex-row justify-between" style="padding-top: 1rem;">
+                <div>
+                    <div class="title" style="color: var(--secondary);">PGGM</div>
+                    <div class="subtitle" style="color: var(--text-secondary);">Institutional Atelier</div>
+                </div>
+                <button class="mobile-toggle material-symbols-outlined mobile-only"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">close</button>
+            </div>
+            <div style="flex: 1; overflow-y: auto;">
+                <pggm-navigation-menu>
+                    <pggm-nav-section>
+                        <span slot="icon" class="material-symbols-outlined section-icon">dashboard</span>
+                        <span slot="label">Portfolios</span>
 
-      <pggm-dropdown>
-        <button slot="trigger">
-          Actions
-        </button>
-        <pggm-dropdown-item checked>
-          Edit
-          <span slot="details">Ctrl+S</span>
-        </pggm-dropdown-item>
-        <pggm-dropdown-item>Copy</pggm-dropdown-item>
-        <pggm-dropdown-item>Export
-          <div slot="submenu">
-            <pggm-dropdown-item>Export as text</pggm-dropdown-item>
-            <pggm-dropdown-item>Export as archive</pggm-dropdown-item>
-          </div>
-        </pggm-dropdown-item>
-        <pggm-dropdown-item>Delete
-          <div slot="submenu">
-            <pggm-dropdown-item>Delete permanently</pggm-dropdown-item>
-            <pggm-dropdown-item>Move to trash
-              <div slot="submenu">
-                <pggm-dropdown-item>Empty trash</pggm-dropdown-item>
-                <pggm-dropdown-item>Restore from trash
-              </div>
-            </pggm-dropdown-item>
-          </div>
-        </pggm-dropdown-item>
-      </pggm-dropdown>
-    </div>
-    <div slot="footer">Peter Huisman</div>
-  </p-component>
-  <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" type="module"></script>
-  <script src="../dist/p-component.js" defer></script>
-  <script>
+                        <pggm-nav-category label="Multi-Asset Fund" expanded>
+                            <pggm-nav-item href="#" active>Portfolio Overview</pggm-nav-item>
+                            <pggm-nav-item href="#">Asset Allocation</pggm-nav-item>
+                            <pggm-nav-item href="#">Risk Analytics</pggm-nav-item>
+                        </pggm-nav-category>
+                        <pggm-nav-category label="Global Equities">
+                            <pggm-nav-item href="#">Overview</pggm-nav-item>
+                        </pggm-nav-category>
+                        <pggm-nav-category label="Real Estate">
+                            <pggm-nav-item href="#">Overview</pggm-nav-item>
+                        </pggm-nav-category>
+                    </pggm-nav-section>
+                    <pggm-nav-section>
+                        <span slot="icon" class="material-symbols-outlined section-icon">groups</span>
+                        <span slot="label">Stakeholders</span>
+                        <pggm-nav-item href="#">Client Reporting</pggm-nav-item>
+                        <pggm-nav-item href="#">Trustees</pggm-nav-item>
+                    </pggm-nav-section>
+                </pggm-navigation-menu>
+            </div>
+            <div class="nav-bottom">
+                <button class="btn-new flex-row">
+                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+                    <span>New Analysis</span>
+                </button>
+            </div>
+        </div>
 
-    document.querySelector('pggm-dropdown').addEventListener('dropdownSelect', (event) => {
-      console.log(event.detail.item.textContent);
-    });
+        <!-- Main Content (Default Slot) -->
+        <div class="dashboard-content">
+            <!-- Hero Metrics -->
+            <div class="grid-cards">
+                <!-- NAV Card -->
+                <div class="card flex-col">
+                    <div class="card-label">Total Net Asset Value</div>
+                    <div class="card-value flex-row">
+                        €242.8B
+                        <div class="card-metric positive">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span> 1.2%
+                        </div>
+                    </div>
+                    <div class="card-footer flex-row justify-between">
+                        <span>Last quarter: €239.9B</span>
+                        <span class="tag">Institutional Grade</span>
+                    </div>
+                </div>
+                <!-- ROI Card -->
+                <div class="card flex-col">
+                    <div class="card-label">Annualized Return (Net)</div>
+                    <div class="card-value flex-row">
+                        7.42%
+                        <div class="card-metric negative">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_downward</span> 0.3%
+                        </div>
+                    </div>
+                    <div class="card-footer flex-row justify-between">
+                        <span>Benchmark: 6.85%</span>
+                        <span class="tag" style="background:none; border:none; padding:0; font-size: 0.625rem;">+57 bps
+                            Alpha</span>
+                    </div>
+                </div>
+                <!-- Sustainability Card -->
+                <div class="card green flex-col">
+                    <div class="card-label">Sustainability Performance</div>
+                    <div class="card-value flex-row justify-between" style="margin-bottom: 1rem;">
+                        84.2
+                        <span class="tag white">PLATINUM</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="flex-row justify-between"
+                        style="font-size: 0.625rem; font-weight: 500; color: rgba(255,255,255,0.8);">
+                        <span>Portfolio ESG Score</span>
+                        <span>Target: 80.0</span>
+                    </div>
+                </div>
+            </div>
 
-  </script>
+            <!-- Chart Section -->
+            <div class="card flex-col" style="margin-bottom: 2.5rem;">
+                <div class="flex-row justify-between">
+                    <div>
+                        <h2
+                            style="font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin: 0 0 0.25rem 0;">
+                            Cumulative Performance</h2>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">Historical performance
+                            data normalized against the APW Benchmark.</p>
+                    </div>
+                </div>
+                <!-- Mock Chart Canvas -->
+                <div class="chart-box">
+                    <div class="chart-lines">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <svg style="width: 100%; height: 200px; position: relative; z-index: 10;" viewbox="0 0 800 200"
+                        preserveAspectRatio="none">
+                        <path d="M0,150 Q100,120 200,140 T400,80 T600,60 T800,20" fill="none" stroke="#008751"
+                            stroke-width="4"></path>
+                        <path class="line-chart-gradient" d="M0,150 Q100,120 200,140 T400,80 T600,60 T800,20 V200 H0 Z"
+                            fill="rgba(0,135,81,0.1)"></path>
+                        <path d="M0,160 Q100,150 200,155 T400,120 T600,110 T800,90" fill="none" opacity="0.4"
+                            stroke="#3b5e97" stroke-dasharray="5,5" stroke-width="3"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Demo Component Interactive Box -->
+            <form onsubmit={this.handleSubmit} class="interactive-box flex-col">
+                <h3 style="font-weight: 700; color: var(--secondary); margin: 0 0 1rem 0;">Web Component Integration
+                    Demo</h3>
+                <div style="margin-bottom: 1.5rem;">
+                    <span class="card-label" style="display: block;">Asset Selection Integration</span>
+                    <!-- Web Component Injection -->
+                    <pggm-combobox multiple name="test" value="banana" required="required" min="2"
+                        style="display: block; width: 100%; max-width: 400px; margin-top: 0.5rem;">
+                        <pggm-combobox-item value="apple">Apple<span slot="details">Core
+                                equity</span></pggm-combobox-item>
+                        <pggm-combobox-item value="banana">Banana<span slot="details">Emerging
+                                market</span></pggm-combobox-item>
+                        <pggm-combobox-item value="orange">Orange<span slot="details">Hedged
+                                index</span></pggm-combobox-item>
+                    </pggm-combobox>
+                </div>
+                <button type="submit" class="btn-new" style="max-width: 250px;">Execute Demo Strategy</button>
+            </form>
+
+        </div>
+    </pggm-page>
+
+    <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" type="module"></script>
+    <script src="../dist/p-component.js" defer></script>
+    <script>
+        const eventHandler = (event) => {
+            const page = event.target.closest('pggm-page');
+            page.toggleNavigation();
+        }
+        document.querySelectorAll('.mobile-toggle').forEach(
+            button => button.addEventListener('click', eventHandler));
+    </script>
 </body>
 
 </html>

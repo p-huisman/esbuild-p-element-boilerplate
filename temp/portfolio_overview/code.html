@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PGGM | Institutional Manager Portfolio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "outline": "#6e7a70",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-container": "#bd555a",
+                        "surface-tint": "#006d40",
+                        "on-primary-container": "#fdfff9",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#191c1e",
+                        "tertiary-fixed": "#ffdad9",
+                        "tertiary": "#9d3d43",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#001b3e",
+                        "on-primary-fixed": "#002110",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary-fixed-variant": "#80272e",
+                        "secondary-fixed-dim": "#aac7ff",
+                        "on-primary-fixed-variant": "#00522f",
+                        "outline-variant": "#bdcabe",
+                        "background": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#d7e3ff",
+                        "primary": "#006b3f",
+                        "primary-container": "#008751",
+                        "surface-container-low": "#f2f4f6",
+                        "primary-fixed-dim": "#70db9d",
+                        "primary-fixed": "#8df8b7",
+                        "surface-dim": "#d8dadc",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#284d85",
+                        "tertiary-fixed-dim": "#ffb3b3",
+                        "secondary-container": "#9dbffe",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#40000a",
+                        "surface-container": "#eceef0",
+                        "secondary": "#3b5e97",
+                        "inverse-surface": "#2d3133",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed-variant": "#21467e",
+                        "inverse-primary": "#70db9d",
+                        "on-background": "#191c1e",
+                        "surface-container-high": "#e6e8ea",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#fffeff",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4a41"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .line-chart-gradient {
+            background: linear-gradient(180deg, rgba(0, 135, 81, 0.1) 0%, rgba(0, 135, 81, 0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-screen w-64 z-50 bg-[#003168] dark:bg-slate-950 flex flex-col py-8 shadow-2xl shadow-[#003168]/20 font-['Public_Sans'] antialiased tracking-tight">
+<div class="px-6 mb-10">
+<div class="text-2xl font-bold text-white tracking-widest uppercase mb-1">PGGM</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-[0.2em]">Institutional Atelier</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#008751] bg-white/5 border-l-4 border-[#008751] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm">Portfolio Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined" data-icon="pie_chart">pie_chart</span>
+<span class="text-sm">Asset Allocation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-sm">Risk Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined" data-icon="eco">eco</span>
+<span class="text-sm">Sustainability Score</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="text-sm">Compliance Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-primary-container text-white py-3 rounded flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span class="text-sm font-semibold uppercase tracking-wider">New Analysis</span>
+</button>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-8 w-[calc(100%-256px)] ml-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-outline-variant/10">
+<div class="flex items-center gap-6">
+<div class="text-lg font-semibold text-[#003168] dark:text-white">Institutional Manager</div>
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-sm">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded text-sm w-80 focus:ring-2 focus:ring-[#008751]/20" placeholder="Search portfolios or assets..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<div class="flex items-center gap-4 text-slate-500">
+<span class="material-symbols-outlined hover:text-[#008751] transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined hover:text-[#008751] transition-colors cursor-pointer" data-icon="history">history</span>
+<span class="material-symbols-outlined hover:text-[#008751] transition-colors cursor-pointer" data-icon="help_outline">help_outline</span>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<div class="text-xs font-bold text-on-surface">Admin User</div>
+<div class="text-[10px] text-slate-500">Portfolio Director</div>
+</div>
+<img alt="Administrator Profile" class="w-8 h-8 rounded-full bg-surface-container-low border border-outline-variant/20" data-alt="Close up professional portrait of a business director" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDBnoFf6oliWaCaHJb5ViX1wrjsvBYDn1PsVRVIhmv49ukCzD3GQAU4hE9YJY7GMVUA7Ppc0P7UKQd66RusEi_LU1OWyL3BmEZAsnDpTrJ90dKtbojlrNj6DrlwaMh66tfiiXcVYI3CriQZ1KTU7LHTu07UlE4T9cUWrFAczkHVRI_jU4htBPHdMzLNMNGoyrnO5_1vYa-ytzXIsWSqyH84RxcemwDBq5h6pBsSrjEdsgHNPxlZBQLa4lTyKNoMmzlc8fXNcSlVkg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+<!-- Hero Metrics Asymmetric Layout -->
+<div class="grid grid-cols-12 gap-6 mb-10">
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-6 rounded shadow-sm border border-outline-variant/5">
+<div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Total Net Asset Value</div>
+<div class="flex items-baseline gap-2">
+<div class="text-4xl font-bold tracking-tight text-[#003168]">€242.8B</div>
+<div class="text-xs font-bold text-[#008751] flex items-center">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_upward">arrow_upward</span>
+                        1.2%
+                    </div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/10 flex justify-between items-center">
+<span class="text-xs text-slate-500">Last quarter: €239.9B</span>
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Institutional Grade</span>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-6 rounded shadow-sm border border-outline-variant/5">
+<div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Annualized Return (Net)</div>
+<div class="flex items-baseline gap-2">
+<div class="text-4xl font-bold tracking-tight text-[#003168]">7.42%</div>
+<div class="text-xs font-bold text-tertiary flex items-center">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_downward">arrow_downward</span>
+                        0.3%
+                    </div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/10 flex justify-between items-center">
+<span class="text-xs text-slate-500">Benchmark: 6.85%</span>
+<span class="text-[10px] text-[#008751] font-bold">+57 bps Alpha</span>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 bg-[#008751] p-6 rounded shadow-lg text-white">
+<div class="text-[10px] uppercase tracking-widest text-white/70 font-bold mb-1">Sustainability Performance</div>
+<div class="flex items-baseline justify-between mb-4">
+<div class="text-4xl font-bold tracking-tight">84.2</div>
+<div class="text-xs font-bold bg-white/20 px-2 py-1 rounded">PLATINUM</div>
+</div>
+<div class="w-full h-1 bg-white/20 rounded-full mb-2 overflow-hidden">
+<div class="h-full bg-white w-[84%]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-medium text-white/80">
+<span>Portfolio ESG Score</span>
+<span>Target: 80.0</span>
+</div>
+</div>
+</div>
+<!-- Chart Section -->
+<div class="grid grid-cols-12 gap-6 mb-10">
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-8 rounded shadow-sm border border-outline-variant/5">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-xl font-bold text-[#003168]">Cumulative Portfolio Performance</h2>
+<p class="text-sm text-slate-500">Historical performance data normalized against the APW Benchmark.</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-primary">1M</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-primary">6M</button>
+<button class="px-3 py-1.5 text-xs font-bold text-primary bg-primary/5 rounded">1Y</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-primary">ALL</button>
+</div>
+</div>
+<!-- Mock Chart Canvas -->
+<div class="h-[300px] w-full relative flex flex-col justify-end">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+</div>
+<svg class="w-full h-full z-10 overflow-visible" viewbox="0 0 800 200">
+<path d="M0,150 Q100,120 200,140 T400,80 T600,60 T800,20" fill="none" stroke="#008751" stroke-width="3"></path>
+<path class="line-chart-gradient" d="M0,150 Q100,120 200,140 T400,80 T600,60 T800,20 V200 H0 Z" fill="rgba(0,135,81,0.1)"></path>
+<!-- Benchmark Line -->
+<path d="M0,160 Q100,150 200,155 T400,120 T600,110 T800,90" fill="none" opacity="0.4" stroke="#3b5e97" stroke-dasharray="5,5" stroke-width="2"></path>
+</svg>
+<div class="flex justify-between mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest px-1">
+<span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<!-- Risk Analysis Card -->
+<div class="bg-surface-container-low p-6 rounded border border-outline-variant/10">
+<h3 class="text-sm font-bold text-[#003168] mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="verified_user">verified_user</span>
+                        Risk Exposure Profile
+                    </h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium">Market Volatility (VIX)</span>
+<span class="font-bold">Low</span>
+</div>
+<div class="w-full h-1.5 bg-outline-variant/30 rounded-full">
+<div class="h-full bg-primary w-1/4 rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium">Liquidity Risk</span>
+<span class="font-bold">Moderate</span>
+</div>
+<div class="w-full h-1.5 bg-outline-variant/30 rounded-full">
+<div class="h-full bg-secondary w-2/4 rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-medium">Counterparty Credit Risk</span>
+<span class="font-bold">Minimal</span>
+</div>
+<div class="w-full h-1.5 bg-outline-variant/30 rounded-full">
+<div class="h-full bg-primary w-1/6 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Projects Bento Style -->
+<div class="bg-surface-container-lowest p-6 rounded border border-outline-variant/10 flex-1">
+<h3 class="text-sm font-bold text-[#003168] mb-4">Strategic Allocation</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container-low p-3 rounded">
+<div class="text-[9px] uppercase font-bold text-slate-500 mb-1">Equities</div>
+<div class="text-lg font-bold">42.4%</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded">
+<div class="text-[9px] uppercase font-bold text-slate-500 mb-1">Fixed Income</div>
+<div class="text-lg font-bold">35.1%</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded">
+<div class="text-[9px] uppercase font-bold text-slate-500 mb-1">Real Estate</div>
+<div class="text-lg font-bold">12.5%</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded">
+<div class="text-[9px] uppercase font-bold text-slate-500 mb-1">Infra</div>
+<div class="text-lg font-bold">10.0%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Table Section -->
+<div class="bg-surface-container-lowest rounded shadow-sm border border-outline-variant/5 overflow-hidden">
+<div class="px-8 py-6 border-b border-outline-variant/10 flex justify-between items-center">
+<h2 class="text-lg font-bold text-[#003168]">Active Portfolio Constituents</h2>
+<div class="flex gap-3">
+<button class="text-xs font-bold text-[#003168] flex items-center gap-1 px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+                        Filter
+                    </button>
+<button class="text-xs font-bold text-[#003168] flex items-center gap-1 px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                        Export PDF
+                    </button>
+</div>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-secondary text-white uppercase text-[10px] tracking-widest font-bold">
+<th class="px-8 py-4">Portfolio Entity</th>
+<th class="px-6 py-4">Primary Manager</th>
+<th class="px-6 py-4">AUM (MM)</th>
+<th class="px-6 py-4">YTD Return</th>
+<th class="px-6 py-4">Sustainability</th>
+<th class="px-8 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-5">
+<div class="text-sm font-bold text-[#003168]">Global Developed Equities</div>
+<div class="text-[10px] text-slate-500 font-medium">CORE-STRAT-A1</div>
+</td>
+<td class="px-6 py-5 text-sm">H. van de Berg</td>
+<td class="px-6 py-5 text-sm font-semibold">€12,450.5</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold text-[#008751]">+8.2%</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#008751]"></span>
+<span class="text-xs font-bold uppercase">AAA</span>
+</div>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-[#008751] text-xs font-bold hover:underline">View Analysis</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-5">
+<div class="text-sm font-bold text-[#003168]">Emerging Markets Bond Fund</div>
+<div class="text-[10px] text-slate-500 font-medium">INC-FIXED-EM</div>
+</td>
+<td class="px-6 py-5 text-sm">S. Agarwal</td>
+<td class="px-6 py-5 text-sm font-semibold">€4,120.2</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold text-tertiary">-1.4%</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-xs font-bold uppercase">BBB+</span>
+</div>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-[#008751] text-xs font-bold hover:underline">View Analysis</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-5">
+<div class="text-sm font-bold text-[#003168]">European Logistic Infrastructure</div>
+<div class="text-[10px] text-slate-500 font-medium">REAL-INFRA-EU</div>
+</td>
+<td class="px-6 py-5 text-sm">L. Dubois</td>
+<td class="px-6 py-5 text-sm font-semibold">€8,900.0</td>
+<td class="px-6 py-5">
+<span class="text-sm font-bold text-[#008751]">+4.5%</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#008751]"></span>
+<span class="text-xs font-bold uppercase">AA-</span>
+</div>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-[#008751] text-xs font-bold hover:underline">View Analysis</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-8 py-4 bg-surface-container-low/50 flex justify-center">
+<button class="text-[10px] font-bold uppercase tracking-widest text-[#3b5e97] hover:text-[#003168] transition-colors">
+                    Load Full Inventory (42 Portfolios)
+                </button>
+</div>
+</div>
+</main>
+</body></html>

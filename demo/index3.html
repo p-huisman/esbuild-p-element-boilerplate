@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>p-component</title>
+  <link rel="stylesheet" href="../dist/styles.css" />
+</head>
+
+<body>
+  <p-component name="World">
+    <div slot="header">Greeting boilerplate</div>
+    <div slot="aside">
+      <ul>
+        <li><a href="https://github.com/p-huisman/esbuild-p-element-boilerplate#readme">Readme</a></li>
+        <li>
+          <h2>Css</h2>
+        </li>
+        <li><a href="https://www.joshwcomeau.com/css/interactive-guide-to-flexbox/">CSS Flexbox guide</a></li>
+        <li><a href="https://www.joshwcomeau.com/css/interactive-guide-to-grid/">CSS Grid guide</a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries">CSS container
+            queries</a></li>
+      </ul>
+
+      <pggm-combobox placeholder="Select a fruit">
+        <pggm-combobox-item>Apple</pggm-combobox-item>
+        <pggm-combobox-item>Banana</pggm-combobox-item>
+        <pggm-combobox-item>Orange</pggm-combobox-item>
+      </pggm-combobox>
+
+      <pggm-combobox placeholder="Select a fruit" with-clear>
+        <pggm-combobox-item>Apple</pggm-combobox-item>
+        <pggm-combobox-item>Banana</pggm-combobox-item>
+        <pggm-combobox-item>Orange</pggm-combobox-item>
+      </pggm-combobox>
+
+      <pggm-combobox visible-items="4" multiple placeholder="Select a fruit" with-clear>
+        <pggm-combobox-item disabled>Apple</pggm-combobox-item>
+        <pggm-combobox-item>Banana</pggm-combobox-item>
+        <pggm-combobox-item>Orange</pggm-combobox-item>
+        <pggm-combobox-item>Pear</pggm-combobox-item>
+        <pggm-combobox-item>Grape</pggm-combobox-item>
+        <pggm-combobox-item>Mango</pggm-combobox-item>
+        <pggm-combobox-item>Pineapple</pggm-combobox-item>
+        <pggm-combobox-item>Strawberry</pggm-combobox-item>
+        <pggm-combobox-item>Watermelon</pggm-combobox-item>
+        <pggm-combobox-item>Blueberry</pggm-combobox-item>
+        <pggm-combobox-item>Raspberry</pggm-combobox-item>
+        <pggm-combobox-item>Blackberry</pggm-combobox-item>
+        <pggm-combobox-item>Kiwi</pggm-combobox-item>
+        <pggm-combobox-item>Peach</pggm-combobox-item>
+        <pggm-combobox-item>Plum</pggm-combobox-item>
+        <pggm-combobox-item>Cherry</pggm-combobox-item>
+        <pggm-combobox-item>Lemon</pggm-combobox-item>
+        <pggm-combobox-item>Lime</pggm-combobox-item>
+        <pggm-combobox-item>Grapefruit</pggm-combobox-item>
+      </pggm-combobox>
+
+      <pggm-dropdown>
+        <button slot="trigger">
+          Actions
+        </button>
+        <pggm-dropdown-item checked>
+          Edit
+          <span slot="details">Ctrl+S</span>
+        </pggm-dropdown-item>
+        <pggm-dropdown-item>Copy</pggm-dropdown-item>
+        <pggm-dropdown-item>Export
+          <div slot="submenu">
+            <pggm-dropdown-item>Export as text</pggm-dropdown-item>
+            <pggm-dropdown-item>Export as archive</pggm-dropdown-item>
+          </div>
+        </pggm-dropdown-item>
+        <pggm-dropdown-item>Delete
+          <div slot="submenu">
+            <pggm-dropdown-item>Delete permanently</pggm-dropdown-item>
+            <pggm-dropdown-item>Move to trash
+              <div slot="submenu">
+                <pggm-dropdown-item>Empty trash</pggm-dropdown-item>
+                <pggm-dropdown-item>Restore from trash
+              </div>
+            </pggm-dropdown-item>
+          </div>
+        </pggm-dropdown-item>
+      </pggm-dropdown>
+    </div>
+    <div slot="footer">Peter Huisman</div>
+  </p-component>
+  <script src="../node_modules/p-elements-core/dist/p-elements-core-modern.js" type="module"></script>
+  <script src="../dist/p-component.js" defer></script>
+  <script>
+
+    document.querySelector('pggm-dropdown').addEventListener('dropdownSelect', (event) => {
+      console.log(event.detail.item.textContent);
+    });
+
+  </script>
+</body>
+
+</html>
