@@ -38,11 +38,17 @@ export class PageElement extends CustomElement {
         super.connectedCallback();
         this.updateViewMode();
         window.addEventListener("resize", this.handleResize);
+
+        this.addEventListener('pageNavigationMenuToggle', this.toggleNavigation);
+        this.addEventListener('pageNavigationMenuClose',  this.hideNavigation);
     }
 
     disconnectedCallback(): void {
         super.disconnectedCallback();
         window.removeEventListener("resize", this.handleResize);
+        this.removeEventListener('pageNavigationMenuToggle', this.toggleNavigation);
+        this.removeEventListener('pageNavigationMenuClose',  this.hideNavigation);
+
     }
 
     @Bind
@@ -134,20 +140,16 @@ export class PageElement extends CustomElement {
                     data-open={this.navOpen ? "true" : "false"}
                     part="navigation-drawer"
                 >
-                    <div class="drawer-header">
-                        <slot name="navigation-header"></slot>
-                    </div>
                     <div class="drawer-body" part="drawer-body">
                         {this.isMobile && <slot name="navigation" key="nav-mobile"></slot>}
                         {this.isMobile && <slot name="menu" key="menu-mobile"></slot>}
-                    </div>
-                    <div class="drawer-footer">
-                        <slot name="navigation-footer"></slot>
                     </div>
                 </div>
             </div>
         );
     }
+
+   
 }
 
 declare global {

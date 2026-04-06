@@ -9,6 +9,7 @@ import "./components/page-navigation-menu/navigation-menu";
 import "./components/page-navigation-menu/nav-section";
 import "./components/page-navigation-menu/nav-category";
 import "./components/page-navigation-menu/nav-item";
+import "./components/page-header/page-header";
 
 @CustomElementConfig({
   tagName: "p-component",

@@ -1,0 +1,130 @@
+:host {
+    display: block;
+    --gae-header-height: 3.5rem;
+    --gae-header-background: var(--surface-container-lowest, #ffffff);
+    --gae-header-border-color: var(--surface-container-high, #e6e8ea);
+    --gae-header-title-color: var(--secondary, #003168);
+    --gae-header-title-size: 1.125rem;
+    --gae-header-action-color: var(--text-secondary, #64748b);
+    --gae-header-action-hover-color: var(--primary, #008751);
+
+    background-color: var(--gae-header-background);
+    /* border-bottom: 1px solid var(--gae-header-border-color); */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+    box-sizing: inherit;
+}
+
+.base {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--gae-header-height);
+    padding: 0;
+    gap: 1rem;
+}
+
+/* ── Left: brand + search ─────────────────────── */
+.start {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.heading {
+    font-size: var(--gae-header-title-size);
+    font-weight: 600;
+    color: var(--gae-header-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* hide heading when brand slot is filled */
+.heading:has(~ slot[name="brand"]:not(:empty)) {
+    display: none;
+}
+
+.search {
+    flex: 1;
+    max-width: 360px;
+    min-width: 0;
+}
+
+/* ── Right: actions + profile ─────────────────── */
+.end {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-shrink: 0;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--gae-header-action-color);
+}
+
+::slotted([slot="actions"]) {
+    color: var(--gae-header-action-color);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.divider {
+    width: 1px;
+    height: 2rem;
+    background-color: var(--gae-header-border-color);
+    flex-shrink: 0;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Mobile toggle ────────────────────────────── */
+.menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--gae-header-action-color);
+    border-radius: 4px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.menu-toggle:hover {
+    color: var(--gae-header-action-hover-color);
+}
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+
+    .search {
+        display: none;
+    }
+}
