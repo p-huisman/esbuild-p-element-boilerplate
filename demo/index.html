@@ -52,10 +52,10 @@
             justify-content: space-between;
         }
 
-        
+
 
         /* navigation actions */
-         .btn-new {
+        .btn-new {
             width: 100%;
             background-color: var(--primary);
             color: white;
@@ -237,16 +237,15 @@
 <body>
 
     <pggm-page>
-        
-      <pggm-page-header slot="header">
-        <div slot="brand">
-        </div>
-        <span slot="actions" class="material-symbols-outlined">notifications</span>
-        <span slot="actions" class="material-symbols-outlined">help_outline</span>
-        <div slot="profile">...</div>
-      </pggm-page-header>
 
-       
+        <pggm-page-header slot="header">
+            <div slot="title">App title</div>
+            <span slot="actions" class="material-symbols-outlined">notifications</span>
+            <span slot="actions" class="material-symbols-outlined">help_outline</span>
+            <div slot="profile">...</div>
+        </pggm-page-header>
+
+
         <pggm-page-navigation-menu slot="navigation">
             <pggm-page-nav-section>
                 <span slot="icon" class="material-symbols-outlined section-icon">dashboard</span>
@@ -272,13 +271,13 @@
             </pggm-page-nav-section>
 
             <div slot="actions">
-              <button class="btn-new flex-row">
-                  <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-                  <span>New Analysis</span>
-              </button>
-          </div>
+                <button class="btn-new flex-row">
+                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+                    <span>New Analysis</span>
+                </button>
+            </div>
         </pggm-page-navigation-menu>
-           
+
 
         <!-- Main Content (Default Slot) -->
         <div class="dashboard-content">

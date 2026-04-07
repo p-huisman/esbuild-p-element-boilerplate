@@ -40,14 +40,14 @@ export class PageElement extends CustomElement {
         window.addEventListener("resize", this.handleResize);
 
         this.addEventListener('pageNavigationMenuToggle', this.toggleNavigation);
-        this.addEventListener('pageNavigationMenuClose',  this.hideNavigation);
+        this.addEventListener('pageNavigationMenuClose', this.hideNavigation);
     }
 
     disconnectedCallback(): void {
         super.disconnectedCallback();
         window.removeEventListener("resize", this.handleResize);
         this.removeEventListener('pageNavigationMenuToggle', this.toggleNavigation);
-        this.removeEventListener('pageNavigationMenuClose',  this.hideNavigation);
+        this.removeEventListener('pageNavigationMenuClose', this.hideNavigation);
 
     }
 
@@ -98,6 +98,7 @@ export class PageElement extends CustomElement {
                 </div>
 
                 <header class="header" part="header">
+                    {this.isMobile && <div class="brand-container-mobile" part="brand-container-mobile"><slot name="brand" key="header-mobile"></slot></div>}
                     <slot name="header"></slot>
                 </header>
 
@@ -107,12 +108,15 @@ export class PageElement extends CustomElement {
 
                 <div class="body" part="body">
                     <nav class="navigation" part="navigation">
+
+                        {!this.isMobile && <div class="brand-container-desktop" part="brand-container-desktop"><slot name="brand" key="header-desktop"></slot></div>}
                         {!this.isMobile && <slot name="navigation" key="nav-desktop"></slot>}
                         {!this.isMobile && <slot name="menu" key="menu-desktop"></slot>}
                     </nav>
 
                     <div class="main-container" part="main-container">
                         <div class="main-header" part="main-header">
+
                             <slot name="main-header"></slot>
                         </div>
 
@@ -149,7 +153,7 @@ export class PageElement extends CustomElement {
         );
     }
 
-   
+
 }
 
 declare global {
